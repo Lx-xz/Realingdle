@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 import LifeBar from '@/components/LifeBar';
 import Button from '@/components/Button';
+import { fetchCharacters } from '@/lib/characters';
 import { supabase } from '@/lib/supabase';
 import { Character } from '@/types';
 import './page.css';
@@ -17,27 +18,74 @@ export default function GamePage() {
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const [characterOfDay, setCharacterOfDay] = useState<Character | null>(null);
+  const [allCharacters, setAllCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const getTodayKey = () => new Date().toISOString().slice(0, 10);
+  const storageKey = 'realingdle:game-state';
 
   useEffect(() => {
     fetchCharacterOfDay();
   }, []);
 
+  useEffect(() => {
+    const syncSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAdmin(Boolean(data.session));
+    };
+
+    syncSession();
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAdmin(Boolean(session));
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
   const fetchCharacterOfDay = async () => {
     try {
-      // Get all characters
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .order('created_at', { ascending: true });
+      const data = await fetchCharacters({ ascending: true });
+      setAllCharacters(data);
 
-      if (error) throw error;
-
-      if (data && data.length > 0) {
+      if (data.length > 0) {
         // Select a character based on the day (simple implementation)
         const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
         const characterIndex = dayOfYear % data.length;
-        setCharacterOfDay(data[characterIndex]);
+        const selectedCharacter = data[characterIndex];
+        setCharacterOfDay(selectedCharacter);
+
+        if (typeof window !== 'undefined') {
+          const raw = window.localStorage.getItem(storageKey);
+          if (raw) {
+            try {
+              const saved = JSON.parse(raw) as {
+                dateKey: string;
+                characterId: string;
+                guesses: string[];
+                lives: number;
+                gameOver: boolean;
+                won: boolean;
+              };
+
+              if (
+                saved.dateKey === getTodayKey() &&
+                saved.characterId === selectedCharacter.id
+              ) {
+                setGuesses(saved.guesses);
+                setLives(saved.lives);
+                setGameOver(saved.gameOver);
+                setWon(saved.won);
+              } else {
+                window.localStorage.removeItem(storageKey);
+              }
+            } catch {
+              window.localStorage.removeItem(storageKey);
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching character:', error);
@@ -46,14 +94,36 @@ export default function GamePage() {
     }
   };
 
+  useEffect(() => {
+    if (!characterOfDay || typeof window === 'undefined') return;
+    const payload = {
+      dateKey: getTodayKey(),
+      characterId: characterOfDay.id,
+      guesses,
+      lives,
+      gameOver,
+      won,
+    };
+    window.localStorage.setItem(storageKey, JSON.stringify(payload));
+  }, [characterOfDay, guesses, lives, gameOver, won]);
+
   const handleGuess = (guess: string) => {
     if (gameOver || !characterOfDay) return;
 
-    const newGuesses = [...guesses, guess];
+    const matchedCharacter = allCharacters.find(
+      (character) => character.name.toLowerCase() === guess.toLowerCase(),
+    );
+
+    if (!matchedCharacter) {
+      setSearchValue('');
+      return;
+    }
+
+    const newGuesses = [...guesses, matchedCharacter.name];
     setGuesses(newGuesses);
 
     // Check if the guess is correct (case-insensitive)
-    if (guess.toLowerCase() === characterOfDay.name.toLowerCase()) {
+    if (matchedCharacter.name.toLowerCase() === characterOfDay.name.toLowerCase()) {
       setWon(true);
       setGameOver(true);
     } else {
@@ -74,7 +144,49 @@ export default function GamePage() {
     setGameOver(false);
     setWon(false);
     setSearchValue('');
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(storageKey);
+    }
     fetchCharacterOfDay();
+  };
+
+  const suggestions = searchValue.trim().length
+    ? allCharacters
+        .filter((character) => character.name.toLowerCase().includes(searchValue.toLowerCase()))
+        .map((character) => ({
+          name: character.name,
+          image_url: character.image_url,
+        }))
+    : [];
+
+  const getCharacterByName = (name: string) =>
+    allCharacters.find((character) => character.name.toLowerCase() === name.toLowerCase()) || null;
+
+  const formatList = (items: { name: string }[]) =>
+    items.length > 0 ? items.map((item) => item.name).join(', ') : '-';
+
+  const renderChips = (
+    items: { id: string; name: string }[],
+    matchItems: { id: string }[],
+    emptyLabel = 'None',
+  ) => {
+    const matchIds = new Set(matchItems.map((item) => item.id));
+    if (items.length === 0) {
+      return (
+        <span className="guess-chip guess-chip--miss">
+          {emptyLabel}
+        </span>
+      );
+    }
+
+    return items.map((item) => (
+      <span
+        key={item.id}
+        className={`guess-chip ${matchIds.has(item.id) ? 'guess-chip--match' : 'guess-chip--miss'}`}
+      >
+        {item.name}
+      </span>
+    ));
   };
 
   if (loading) {
@@ -112,6 +224,9 @@ export default function GamePage() {
               value={searchValue}
               onChange={setSearchValue}
               onSubmit={handleGuess}
+              suggestions={suggestions}
+              onSelectSuggestion={(value) => setSearchValue(value)}
+              noResultsText="No characters found"
               disabled={gameOver}
             />
           </div>
@@ -126,40 +241,128 @@ export default function GamePage() {
                 : `The character was "${characterOfDay.name}"`
               }
             </p>
-            <div className="game__actions">
-              <Button onClick={handleRestart}>Play Again</Button>
-              <Button variant="secondary" onClick={() => router.push('/')}>
-                Back to Home
-              </Button>
-            </div>
+            {(isAdmin || !won) && (
+              <div className="game__actions">
+                <Button onClick={handleRestart}>Play Again</Button>
+              </div>
+            )}
           </div>
         )}
 
         <div className="game__guesses">
-          <h3>Your Guesses ({guesses.length})</h3>
           <ul className="game__guesses-list">
-            {guesses.map((guess, index) => (
-              <li 
-                key={index} 
-                className={`game__guess ${
-                  guess.toLowerCase() === characterOfDay.name.toLowerCase() 
-                    ? 'game__guess--correct' 
-                    : 'game__guess--wrong'
-                }`}
-              >
-                {guess}
-                {guess.toLowerCase() === characterOfDay.name.toLowerCase() ? ' ✓' : ' ✗'}
-              </li>
-            ))}
+            {[...guesses].reverse().map((guess, index) => {
+              const guessedCharacter = getCharacterByName(guess);
+              const isCorrect =
+                guessedCharacter?.id === characterOfDay?.id ||
+                guess.toLowerCase() === characterOfDay?.name.toLowerCase();
+
+              if (!guessedCharacter || !characterOfDay) {
+                return (
+                  <li key={index} className="game__guess-card game__guess-card--unknown">
+                    <div className="game__guess-header">
+                      <span className="game__guess-name">{guess}</span>
+                      <span className="game__guess-status">Unknown</span>
+                    </div>
+                    <p className="game__guess-missing">Character not found.</p>
+                  </li>
+                );
+              }
+
+              const comparisons = {
+                state: guessedCharacter.state?.id === characterOfDay.state?.id,
+                age: (guessedCharacter.age ?? null) === (characterOfDay.age ?? null),
+              };
+
+              const backgroundStyle = guessedCharacter.image_url
+                ? ({ ['--guess-image' as string]: `url(${guessedCharacter.image_url})` } as React.CSSProperties)
+                : undefined;
+
+              return (
+                <li
+                  key={index}
+                  className={`game__guess-card ${
+                    isCorrect ? 'game__guess-card--correct' : 'game__guess-card--wrong'
+                  }`}
+                  style={backgroundStyle}
+                >
+                  <div className="guess-card__content">
+                    <div className="guess-card__info">
+                      <div className="guess-card__title">
+                        <h4>{guessedCharacter.name}</h4>
+                        {guessedCharacter.description && (
+                          <p className="guess-card__quote">“{guessedCharacter.description}”</p>
+                        )}
+                      </div>
+                      <div className="guess-card__row-group">
+                        <div className="guess-card__row guess-card__row--compact">
+                          <span className="guess-card__label">Age</span>
+                          <div className="guess-card__chips">
+                            <span
+                              className={`guess-chip ${
+                                comparisons.age ? 'guess-chip--match' : 'guess-chip--miss'
+                              }`}
+                            >
+                              {guessedCharacter.age ?? '-'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="guess-card__row guess-card__row--compact">
+                          <span className="guess-card__label">State</span>
+                          <div className="guess-card__chips">
+                            <span
+                              className={`guess-chip ${
+                                comparisons.state ? 'guess-chip--match' : 'guess-chip--miss'
+                              }`}
+                            >
+                              {guessedCharacter.state?.name || '-'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="guess-card__row guess-card__row--compact">
+                          <span className="guess-card__label">Classes</span>
+                          <div className="guess-card__chips">
+                            {renderChips(guessedCharacter.classes, characterOfDay.classes)}
+                          </div>
+                        </div>
+
+                        <div className="guess-card__row guess-card__row--compact">
+                          <span className="guess-card__label">Races</span>
+                          <div className="guess-card__chips">
+                            {renderChips(guessedCharacter.races, characterOfDay.races)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="guess-card__row guess-card__row--stacked">
+                        <span className="guess-card__label">Occupations</span>
+                        <div className="guess-card__chips">
+                          {renderChips(guessedCharacter.occupations, characterOfDay.occupations)}
+                        </div>
+                      </div>
+
+                      <div className="guess-card__row guess-card__row--stacked">
+                        <span className="guess-card__label">Associations</span>
+                        <div className="guess-card__chips">
+                          {renderChips(guessedCharacter.associations, characterOfDay.associations)}
+                        </div>
+                      </div>
+
+                      <div className="guess-card__row guess-card__row--stacked">
+                        <span className="guess-card__label">Places</span>
+                        <div className="guess-card__chips">
+                          {renderChips(guessedCharacter.places, characterOfDay.places)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
-
-        {characterOfDay.description && (
-          <div className="game__hint">
-            <h3>Hint</h3>
-            <p>{characterOfDay.description}</p>
-          </div>
-        )}
       </div>
     </div>
   );

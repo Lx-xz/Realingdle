@@ -36,26 +36,22 @@ Realingdle is a character guessing game for the Realing RPG universe. Players ha
 
 ## Database Schema
 
-Create the following table in Supabase:
+Run the Supabase SQL scripts:
 
-```sql
-create table characters (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  description text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-```
+- Schema: [supabase/schema.sql](supabase/schema.sql)
+- Seed data (optional): [supabase/seed.sql](supabase/seed.sql)
 
 ## Environment Variables
 
-Required environment variables (see `.env.example`):
+Required environment variables:
 
 - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-- `NEXT_PUBLIC_ADMIN_USERNAME`: Admin username for configs page
-- `NEXT_PUBLIC_ADMIN_PASSWORD`: Admin password for configs page
+Admin credentials are managed via Supabase Auth (Dashboard > Authentication > Users).
+
+## Storage
+
+Create a public Storage bucket named `characters_images` for image uploads.
 
 ## Game Logic
 
@@ -132,7 +128,7 @@ Defined in `globals.css`:
 
 ## Security Considerations
 
-⚠️ **Important**: The current admin authentication is client-side only and uses environment variables. This is suitable for development but **NOT for production**.
+⚠️ **Important**: The current admin authentication uses a custom `users` table and client-side RPC call. This is suitable for development but **NOT for production**.
 
 For production deployment:
 1. Implement server-side authentication with Next.js API routes

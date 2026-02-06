@@ -2,15 +2,16 @@
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
   display: inline-block;
   text-align: center;
+  border: 1px solid transparent;
 }
 
 .button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px var(--shadow);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px var(--shadow);
 }
 
 .button:active {
@@ -37,21 +38,23 @@
 }
 
 .button--secondary {
-  background-color: transparent;
-  border: 2px solid var(--border);
+  background-color: #ffffff;
+  border: 1px solid var(--border);
   color: var(--foreground);
 }
 
 .button--secondary:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: var(--foreground);
+  color: var(--foreground);
 }
 
 .button--danger {
-  background-color: var(--danger);
-  color: white;
+  background-color: #ffffff;
+  border: 1px solid var(--danger);
+  color: var(--danger);
 }
 
 .button--danger:hover {
-  opacity: 0.9;
+  background-color: var(--danger);
+  color: white;
 }

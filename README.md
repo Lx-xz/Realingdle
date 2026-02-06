@@ -26,17 +26,12 @@ npm install
 ### 2. Configure Supabase
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Create a `characters` table with the following schema:
+2. Run the database setup scripts in Supabase SQL Editor:
 
-```sql
-create table characters (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  description text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-```
+- Schema: [supabase/schema.sql](supabase/schema.sql)
+- Seed data (optional): [supabase/seed.sql](supabase/seed.sql)
+
+3. Create a Storage bucket named `characters_images` (public) for uploads.
 
 3. Copy `.env.example` to `.env.local`:
 
@@ -44,13 +39,11 @@ create table characters (
 cp .env.example .env.local
 ```
 
-4. Update `.env.local` with your Supabase credentials and admin credentials:
+4. Update `.env.local` with your Supabase credentials:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_ADMIN_USERNAME=your_admin_username
-NEXT_PUBLIC_ADMIN_PASSWORD=your_admin_password
 ```
 
 ### 3. Run Development Server
@@ -64,7 +57,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 ### 4. Add Characters
 
 1. Navigate to [http://localhost:3000/configs](http://localhost:3000/configs)
-2. Login with your admin credentials (default: admin/admin123)
+2. Login with your Supabase Auth admin user (create in Supabase Dashboard > Authentication > Users)
 3. Add characters to the database
 
 ## Pages
