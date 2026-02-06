@@ -1,0 +1,36 @@
+.life-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.life-bar__label {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.life-bar__hearts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.life-bar__heart {
+  font-size: 24px;
+  transition: all 0.2s ease;
+}
+
+.life-bar__heart--filled {
+  color: var(--danger);
+  filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3));
+}
+
+.life-bar__heart--empty {
+  color: #d1d5db;
+}

@@ -1,0 +1,120 @@
+.game {
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.game__container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 48px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.game__title {
+  font-size: 36px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.game__search {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.game__result {
+  margin: 32px 0;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.game__result h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.game__result p {
+  font-size: 18px;
+  margin-bottom: 24px;
+  color: #6b7280;
+}
+
+.game__result--win {
+  background-color: #d1fae5;
+  border: 2px solid var(--success);
+}
+
+.game__result--lose {
+  background-color: #fee2e2;
+  border: 2px solid var(--danger);
+}
+
+.game__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.game__guesses {
+  margin-top: 32px;
+}
+
+.game__guesses h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.game__guesses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game__guess {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.game__guess--correct {
+  background-color: #d1fae5;
+  color: var(--success);
+  border: 2px solid var(--success);
+}
+
+.game__guess--wrong {
+  background-color: #fee2e2;
+  color: var(--danger);
+  border: 2px solid var(--danger);
+}
+
+.game__hint {
+  margin-top: 32px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary);
+}
+
+.game__hint h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.game__hint p {
+  color: #6b7280;
+  line-height: 1.6;
+}
