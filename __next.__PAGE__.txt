@@ -1,0 +1,8 @@
+1:"$Sreact.fragment"
+2:I[22016,["/_next/static/chunks/7c92e96509cd355e.js"],""]
+3:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/d2be314c3ece3fbe.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+:HL["/_next/static/chunks/67597a97477f4fca.css","style"]
+:HL["/_next/static/chunks/17b7c7cff55789ac.css","style"]
+0:{"buildId":"iPbQuH9Heei8RC6wXwZQY","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"home","children":["$","main",null,{"className":"home__content","children":[["$","h1",null,{"className":"home__title","children":"Realingdle"}],["$","p",null,{"className":"home__subtitle","children":"Guess the character from Realing RPG universe"}],["$","$L2",null,{"href":"/game","children":["$","button",null,{"className":"button button--primary","type":"button","disabled":false,"children":"Play Game"}]}]]}]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/67597a97477f4fca.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/17b7c7cff55789ac.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null
