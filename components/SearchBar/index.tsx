@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import ScrollArea from "@/components/ScrollArea"
 import "./SearchBar.sass"
 
 interface SearchSuggestion {
@@ -79,32 +80,34 @@ export default function SearchBar({
         {showDropdown && (
           <div className="search-bar__dropdown">
             {hasSuggestions ? (
-              <ul className="search-bar__list">
-                {suggestions.map((suggestion) => (
-                  <li key={suggestion.name} className="search-bar__item">
-                    <button
-                      type="button"
-                      onClick={() => handlePick(suggestion.name)}
-                      className="search-bar__option"
-                    >
-                      {suggestion.image_url ? (
-                        <img
-                          src={suggestion.image_url}
-                          alt={suggestion.name}
-                          className="search-bar__avatar"
-                        />
-                      ) : (
-                        <span className="search-bar__avatar search-bar__avatar--placeholder">
-                          {suggestion.name.charAt(0)}
+              <ScrollArea className="search-bar__scroll" maxHeight={220}>
+                <ul className="search-bar__list">
+                  {suggestions.map((suggestion) => (
+                    <li key={suggestion.name} className="search-bar__item">
+                      <button
+                        type="button"
+                        onClick={() => handlePick(suggestion.name)}
+                        className="search-bar__option"
+                      >
+                        {suggestion.image_url ? (
+                          <img
+                            src={suggestion.image_url}
+                            alt={suggestion.name}
+                            className="search-bar__avatar"
+                          />
+                        ) : (
+                          <span className="search-bar__avatar search-bar__avatar--placeholder">
+                            {suggestion.name.charAt(0)}
+                          </span>
+                        )}
+                        <span className="search-bar__option-text">
+                          {suggestion.name}
                         </span>
-                      )}
-                      <span className="search-bar__option-text">
-                        {suggestion.name}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea>
             ) : (
               <div className="search-bar__empty">{noResultsText}</div>
             )}

@@ -8,6 +8,11 @@
   --border: #d6d6d6
   --shadow: rgba(0, 0, 0, 0.08)
 
+html,
+body
+  height: 100%
+  overflow: hidden
+
 *
   margin: 0
   padding: 0
@@ -20,13 +25,13 @@ body
   line-height: 1.6
 
 .site
-  min-height: 100vh
+  min-height: 100%
   display: flex
   flex-direction: column
 
   &__header,
   &__footer
-    padding: 20px 32px
+    padding: 1rem 2rem
     background: #ffffff
     border-bottom: 1px solid var(--border)
 

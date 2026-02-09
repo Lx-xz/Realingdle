@@ -4,26 +4,26 @@
   align-items: center
 
   &__trigger
-    width: 40px
-    height: 40px
+    width: 60px
+    height: 60px
     border-radius: 12px
-    border: 1px solid var(--border)
+    border: 0.2rem solid transparent
     background: #ffffff
     display: inline-flex
     align-items: center
     justify-content: center
     padding: 0
     transition: transform 0.2s ease, box-shadow 0.2s ease
+    overflow: hidden
 
     &:hover
       transition: 0.3s
-      border-color: var(--foreground)
+      border-color: var(--border)
 
   &__avatar
     width: 100%
     height: 100%
     object-fit: cover
-    border-radius: 12px
 
     &--placeholder
       display: inline-flex

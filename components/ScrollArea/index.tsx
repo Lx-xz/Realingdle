@@ -97,6 +97,19 @@ export default function ScrollArea({
     resizeObserver.observe(content)
     resizeObserver.observe(track)
 
+    const contentChild = content.firstElementChild as HTMLElement | null
+    if (contentChild) {
+      resizeObserver.observe(contentChild)
+    }
+
+    const mutationObserver = new MutationObserver(() => updateThumb())
+    mutationObserver.observe(content, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true,
+    })
+
     const handleWindowResize = () => updateThumb()
     window.addEventListener("resize", handleWindowResize)
 
@@ -228,6 +241,7 @@ export default function ScrollArea({
       if (frame) cancelAnimationFrame(frame)
       content.removeEventListener("scroll", handleScroll)
       resizeObserver.disconnect()
+      mutationObserver.disconnect()
       window.removeEventListener("resize", handleWindowResize)
       thumb.removeEventListener("pointerdown", handlePointerDown)
       track.removeEventListener("pointerdown", handleTrackPointerDown)
@@ -238,13 +252,16 @@ export default function ScrollArea({
     }
   }, [showHorizontal])
 
+  const rootStyle = maxHeight ? { maxHeight } : undefined
+  const contentStyle = maxHeight ? { maxHeight } : undefined
+
   return (
-    <div
-      className={`scroll-area ${className}`}
-      ref={rootRef}
-      style={maxHeight ? { maxHeight } : undefined}
-    >
-      <div className="scroll-area__content" ref={contentRef}>
+    <div className={`scroll-area ${className}`} ref={rootRef} style={rootStyle}>
+      <div
+        className="scroll-area__content"
+        ref={contentRef}
+        style={contentStyle}
+      >
         {children}
       </div>
       <div className="scroll-area__track" ref={trackRef}>
