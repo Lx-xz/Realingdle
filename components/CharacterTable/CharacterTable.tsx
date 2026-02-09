@@ -11,7 +11,9 @@ import {
   Race,
   State,
 } from '@/types';
-import Button from './Button';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import Button from '../Button';
+import ScrollArea from '../ScrollArea';
 import './CharacterTable.css';
 
 interface CharacterTableProps {
@@ -59,7 +61,7 @@ export default function CharacterTable({
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [imageSource, setImageSource] = useState<'url' | 'upload'>('url');
   const [imagePreview, setImagePreview] = useState<string>('');
-  const baseImageUrl = 'https://placehold.co/200x400?text=';
+  const baseImageUrl = 'https://placehold.co/300x400?text=Nome';
 
   const toggleSelection = (
     key: 'class_ids' | 'race_ids' | 'occupation_ids' | 'association_ids' | 'place_ids',
@@ -154,12 +156,14 @@ export default function CharacterTable({
             type="button"
             className="attribute-picker__add"
             onClick={() => setOpenMenu(isOpen ? null : fieldKey)}
+            aria-label={`Adicionar ${label}`}
+            title={`Adicionar ${label}`}
           >
-            +
+            <Plus size={14} />
           </button>
         </div>
         {isOpen && (
-          <div className="attribute-picker__menu">
+          <ScrollArea className="attribute-picker__menu attribute-picker__menu--open" maxHeight={200}>
             {options.map((option) => {
               const isSelected = selectedIds.includes(option.id);
               return (
@@ -185,7 +189,7 @@ export default function CharacterTable({
                 </button>
               );
             })}
-          </div>
+          </ScrollArea>
         )}
         <div className="attribute-picker__tags">
           {selectedItems.length === 0 ? (
@@ -263,7 +267,7 @@ export default function CharacterTable({
       </div>
 
       {isAdding && (
-        <form className="character-form" onSubmit={handleSubmit}>
+        <form className="character-form character-form--open" onSubmit={handleSubmit}>
           <div className="character-form__grid">
             <div className="character-form__field character-form__field--wide">
               <label>Image</label>
@@ -426,7 +430,7 @@ export default function CharacterTable({
         </form>
       )}
 
-      <div className="character-table__table-wrapper">
+      <ScrollArea className="character-table__table-wrapper" maxHeight={520} showHorizontal>
         <table className="character-table__table">
           <thead>
             <tr>
@@ -467,11 +471,21 @@ export default function CharacterTable({
                   )}
                 </td>
                 <td className="character-table__actions">
-                  <Button variant="secondary" onClick={() => handleEdit(character)}>
-                    Edit
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleEdit(character)}
+                    aria-label="Editar"
+                    title="Editar"
+                  >
+                    <Pencil size={16} />
                   </Button>
-                  <Button variant="danger" onClick={() => onDelete(character.id)}>
-                    Delete
+                  <Button
+                    variant="danger"
+                    onClick={() => onDelete(character.id)}
+                    aria-label="Excluir"
+                    title="Excluir"
+                  >
+                    <Trash2 size={16} />
                   </Button>
                 </td>
               </tr>
@@ -485,7 +499,7 @@ export default function CharacterTable({
             )}
           </tbody>
         </table>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

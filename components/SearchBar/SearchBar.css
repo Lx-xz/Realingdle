@@ -62,9 +62,15 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 10px 24px var(--shadow);
-  max-height: 220px;
-  overflow-y: auto;
   z-index: 10;
+}
+
+.search-bar__dropdown .scroll-area__content {
+  padding-right: 0;
+}
+
+.search-bar__dropdown .scroll-area__track {
+  right: -22px;
 }
 
 .search-bar__list {

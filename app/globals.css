@@ -15,11 +15,32 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
   line-height: 1.6;
+  overflow: hidden;
+}
+
+.app-scroll {
+  height: 100vh;
+}
+
+.app-scroll .scroll-area__content {
+  height: 100vh;
+  padding-right: 0;
+}
+
+.app-scroll .scroll-area__track {
+  right: 6px;
+  top: 10px;
+  bottom: 10px;
 }
 
 .site {

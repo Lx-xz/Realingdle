@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import ScrollPage from "@/components/ScrollPage";
 
 export const metadata: Metadata = {
   title: "Realingdle - Character Guessing Game",
@@ -23,19 +24,21 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="site">
-          <header className="site__header">
-            <Link href="/" className="site__logo">
-              REALINGDLE
-            </Link>
-          </header>
-          <main className="site__main">{children}</main>
-          <footer className="site__footer">
-            <Link href="/configs" className="site__footer-link">
-              Configuracoes
-            </Link>
-          </footer>
-        </div>
+        <ScrollPage>
+          <div className="site">
+            <header className="site__header">
+              <Link href="/" className="site__logo">
+                REALINGDLE
+              </Link>
+            </header>
+            <main className="site__main">{children}</main>
+            <footer className="site__footer">
+              <Link href="/configs" className="site__footer-link">
+                Configuracoes
+              </Link>
+            </footer>
+          </div>
+        </ScrollPage>
       </body>
     </html>
   );
