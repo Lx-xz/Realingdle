@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import Button from '@/components/Button';
-import './page.css';
+import Link from "next/link"
+import Button from "@/components/Button"
+import "./page.sass"
 
 export default function Home() {
   return (
@@ -15,5 +15,5 @@ export default function Home() {
         </Link>
       </main>
     </div>
-  );
+  )
 }

@@ -1,0 +1,202 @@
+.profile
+  display: flex
+  justify-content: center
+  padding: 24px 12px
+
+  &__card
+    width: 100%
+    max-width: 560px
+    background: #ffffff
+    border-radius: 20px
+    padding: 32px
+    border: 1px solid var(--border)
+    box-shadow: 0 18px 40px var(--shadow)
+
+  &__header
+    display: flex
+    gap: 16px
+    align-items: center
+    margin-bottom: 24px
+    position: relative
+
+  &__avatar
+    width: 72px
+    height: 72px
+    border-radius: 18px
+    border: 1px solid var(--border)
+    background: #f5f5f5
+    display: flex
+    align-items: center
+    justify-content: center
+    overflow: hidden
+
+    img
+      width: 100%
+      height: 100%
+      object-fit: cover
+
+    span
+      font-weight: 700
+      font-size: 20px
+      color: #4a4a4a
+
+  &__title
+    font-size: 24px
+    font-weight: 700
+    margin-bottom: 4px
+
+  &__subtitle
+    font-size: 14px
+    color: #5a5a5a
+
+  &__info
+    display: grid
+    gap: 12px
+
+  &__form
+    display: grid
+    gap: 12px
+
+  &__field
+    display: flex
+    flex-direction: column
+    gap: 6px
+
+    label
+      font-weight: 600
+      font-size: 12px
+      letter-spacing: 0.08em
+      text-transform: uppercase
+      color: #6b6b6b
+
+    input
+      padding: 12px
+      border: 1px solid var(--border)
+      border-radius: 10px
+      font-size: 15px
+      outline: none
+
+      &:focus
+        border-color: var(--primary)
+
+  &__switch
+    display: inline-flex
+    gap: 6px
+    padding: 4px
+    border-radius: 999px
+    border: 1px solid var(--border)
+    background: #f3f3f3
+
+    button
+      border: none
+      background: transparent
+      padding: 6px 14px
+      border-radius: 999px
+      font-size: 13px
+      font-weight: 600
+      color: #5a5a5a
+      transition: all 0.2s ease
+
+      &.is-active
+        background: #111111
+        color: #ffffff
+
+  &__upload
+    display: flex
+    flex-wrap: wrap
+    gap: 8px
+    align-items: center
+
+    input[type="file"]
+      position: absolute
+      width: 1px
+      height: 1px
+      padding: 0
+      margin: -1px
+      overflow: hidden
+      clip: rect(0, 0, 0, 0)
+      border: 0
+
+  &__file-button
+    padding: 10px 14px
+    border-radius: 10px
+    border: 1px dashed var(--border)
+    background: #ffffff
+    font-weight: 600
+    font-size: 13px
+    cursor: pointer
+
+    &:hover
+      border-color: #111111
+
+  &__file-name
+    font-size: 13px
+    color: #6b6b6b
+
+  &__upload-note
+    font-size: 12px
+    color: #6b6b6b
+
+  &__row
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+  &__label
+    font-weight: 600
+    font-size: 12px
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    color: #6b6b6b
+
+  &__value
+    font-size: 15px
+    word-break: break-all
+
+  &__edit
+    position: absolute
+    top: 0
+    right: 0
+    width: 36px
+    height: 36px
+    border-radius: 10px
+    border: 1px solid var(--border)
+    background: #ffffff
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    transition: transform 0.2s ease, box-shadow 0.2s ease
+
+    &:hover
+      transform: translateY(-1px)
+      box-shadow: 0 8px 16px var(--shadow)
+
+  &__actions
+    display: flex
+    gap: 12px
+    margin-top: 8px
+
+  &__save,
+  &__cancel
+    padding: 10px 16px
+    border-radius: 10px
+    font-weight: 600
+    font-size: 14px
+
+  &__save
+    background: var(--primary)
+    color: #ffffff
+
+  &__cancel
+    background: #ffffff
+    border: 1px solid var(--border)
+
+  &__message
+    color: var(--success)
+    font-size: 14px
+    font-weight: 500
+
+  &__error
+    color: var(--danger)
+    font-size: 14px
+    font-weight: 500

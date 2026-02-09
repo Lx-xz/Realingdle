@@ -1,6 +1,7 @@
-'use client';
+"use client"
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Check, Pencil, Plus, Trash2 } from "lucide-react"
 import {
   Association,
   Character,
@@ -10,36 +11,36 @@ import {
   Place,
   Race,
   State,
-} from '@/types';
-import Button from './Button';
-import './CharacterTable.css';
+} from "@/types"
+import Button from "@/components/Button"
+import "./CharacterTable.sass"
 
 interface CharacterTableProps {
-  characters: Character[];
-  states: State[];
-  classes: Class[];
-  races: Race[];
-  occupations: Occupation[];
-  associations: Association[];
-  places: Place[];
-  onAdd: (character: CharacterFormData) => void;
-  onEdit: (id: string, character: CharacterFormData) => void;
-  onDelete: (id: string) => void;
+  characters: Character[]
+  states: State[]
+  classes: Class[]
+  races: Race[]
+  occupations: Occupation[]
+  associations: Association[]
+  places: Place[]
+  onAdd: (character: CharacterFormData) => void
+  onEdit: (id: string, character: CharacterFormData) => void
+  onDelete: (id: string) => void
 }
 
 const emptyFormData: CharacterFormData = {
-  name: '',
-  description: '',
-  image_url: '',
+  name: "",
+  description: "",
+  image_url: "",
   image_file: null,
-  age: '',
-  state_id: '',
+  age: "",
+  state_id: "",
   class_ids: [],
   race_ids: [],
   occupation_ids: [],
   association_ids: [],
   place_ids: [],
-};
+}
 
 export default function CharacterTable({
   characters,
@@ -53,27 +54,34 @@ export default function CharacterTable({
   onEdit,
   onDelete,
 }: CharacterTableProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<CharacterFormData>(emptyFormData);
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [imageSource, setImageSource] = useState<'url' | 'upload'>('url');
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const baseImageUrl = 'https://placehold.co/200x400?text=';
+  const [isAdding, setIsAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [formData, setFormData] = useState<CharacterFormData>(emptyFormData)
+  const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const [imageSource, setImageSource] = useState<"url" | "upload">("url")
+  const [imagePreview, setImagePreview] = useState<string>("")
+  const baseImageUrl = "https://placehold.co/200x400?text="
 
   const toggleSelection = (
-    key: 'class_ids' | 'race_ids' | 'occupation_ids' | 'association_ids' | 'place_ids',
+    key:
+      | "class_ids"
+      | "race_ids"
+      | "occupation_ids"
+      | "association_ids"
+      | "place_ids",
     value: string,
   ) => {
     setFormData((current) => {
-      const list = current[key];
-      const hasValue = list.includes(value);
+      const list = current[key]
+      const hasValue = list.includes(value)
       return {
         ...current,
-        [key]: hasValue ? list.filter((item) => item !== value) : [...list, value],
-      };
-    });
-  };
+        [key]: hasValue
+          ? list.filter((item) => item !== value)
+          : [...list, value],
+      }
+    })
+  }
 
   const optionMaps = useMemo(
     () => ({
@@ -84,31 +92,31 @@ export default function CharacterTable({
       place_ids: places,
     }),
     [classes, races, occupations, associations, places],
-  );
+  )
 
   useEffect(() => {
-    if (imageSource === 'url' && !formData.image_url) {
+    if (imageSource === "url" && !formData.image_url) {
       setFormData((current) => ({
         ...current,
         image_url: baseImageUrl,
-      }));
+      }))
     }
 
-    if (imageSource === 'upload' && formData.image_file) {
-      const previewUrl = URL.createObjectURL(formData.image_file);
-      setImagePreview(previewUrl);
+    if (imageSource === "upload" && formData.image_file) {
+      const previewUrl = URL.createObjectURL(formData.image_file)
+      setImagePreview(previewUrl)
       return () => {
-        URL.revokeObjectURL(previewUrl);
-      };
+        URL.revokeObjectURL(previewUrl)
+      }
     }
 
-    if (imageSource === 'url' && formData.image_url.trim()) {
-      setImagePreview(formData.image_url.trim());
-      return;
+    if (imageSource === "url" && formData.image_url.trim()) {
+      setImagePreview(formData.image_url.trim())
+      return
     }
 
-    setImagePreview('');
-  }, [imageSource, formData.image_file, formData.image_url]);
+    setImagePreview("")
+  }, [imageSource, formData.image_file, formData.image_url])
 
   const AttributePicker = ({
     label,
@@ -119,32 +127,34 @@ export default function CharacterTable({
     onRemove,
     single = false,
   }: {
-    label: string;
-    fieldKey: string;
-    options: { id: string; name: string }[];
-    selectedIds: string[];
-    onAdd: (id: string) => void;
-    onRemove: (id: string) => void;
-    single?: boolean;
+    label: string
+    fieldKey: string
+    options: { id: string; name: string }[]
+    selectedIds: string[]
+    onAdd: (id: string) => void
+    onRemove: (id: string) => void
+    single?: boolean
   }) => {
-    const ref = useRef<HTMLDivElement | null>(null);
-    const isOpen = openMenu === fieldKey;
-    const selectedItems = options.filter((option) => selectedIds.includes(option.id));
+    const ref = useRef<HTMLDivElement | null>(null)
+    const isOpen = openMenu === fieldKey
+    const selectedItems = options.filter((option) =>
+      selectedIds.includes(option.id),
+    )
 
     useEffect(() => {
-      if (!isOpen) return;
+      if (!isOpen) return
       const handleClickOutside = (event: MouseEvent) => {
-        if (!ref.current) return;
+        if (!ref.current) return
         if (!ref.current.contains(event.target as Node)) {
-          setOpenMenu(null);
+          setOpenMenu(null)
         }
-      };
+      }
 
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside)
       return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, [isOpen]);
+        document.removeEventListener("mousedown", handleClickOutside)
+      }
+    }, [isOpen])
 
     return (
       <div className="attribute-picker" ref={ref}>
@@ -155,35 +165,39 @@ export default function CharacterTable({
             className="attribute-picker__add"
             onClick={() => setOpenMenu(isOpen ? null : fieldKey)}
           >
-            +
+            <Plus size={14} />
           </button>
         </div>
         {isOpen && (
           <div className="attribute-picker__menu">
             {options.map((option) => {
-              const isSelected = selectedIds.includes(option.id);
+              const isSelected = selectedIds.includes(option.id)
               return (
                 <button
                   key={option.id}
                   type="button"
-                  className={`attribute-picker__option ${isSelected ? 'is-selected' : ''}`}
+                  className={`attribute-picker__option ${isSelected ? "is-selected" : ""}`}
                   onClick={() => {
                     if (single) {
-                      onAdd(option.id);
-                      setOpenMenu(null);
-                      return;
+                      onAdd(option.id)
+                      setOpenMenu(null)
+                      return
                     }
                     if (isSelected) {
-                      onRemove(option.id);
+                      onRemove(option.id)
                     } else {
-                      onAdd(option.id);
+                      onAdd(option.id)
                     }
                   }}
                 >
                   <span>{option.name}</span>
-                  {isSelected && <span className="attribute-picker__check">v</span>}
+                  {isSelected && (
+                    <span className="attribute-picker__check">
+                      <Check size={12} />
+                    </span>
+                  )}
                 </button>
-              );
+              )
             })}
           </div>
         )}
@@ -206,50 +220,50 @@ export default function CharacterTable({
           )}
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (editingId) {
-      onEdit(editingId, formData);
-      setEditingId(null);
+      onEdit(editingId, formData)
+      setEditingId(null)
     } else {
-      onAdd(formData);
-      setIsAdding(false);
+      onAdd(formData)
+      setIsAdding(false)
     }
-    setFormData(emptyFormData);
-    setImageSource('url');
-  };
+    setFormData(emptyFormData)
+    setImageSource("url")
+  }
 
   const handleEdit = (character: Character) => {
-    setEditingId(character.id);
+    setEditingId(character.id)
     setFormData({
       name: character.name,
-      description: character.description || '',
-      image_url: character.image_url || '',
+      description: character.description || "",
+      image_url: character.image_url || "",
       image_file: null,
-      age: character.age ?? '',
-      state_id: character.state?.id || '',
+      age: character.age ?? "",
+      state_id: character.state?.id || "",
       class_ids: character.classes.map((item) => item.id),
       race_ids: character.races.map((item) => item.id),
       occupation_ids: character.occupations.map((item) => item.id),
       association_ids: character.associations.map((item) => item.id),
       place_ids: character.places.map((item) => item.id),
-    });
-    setIsAdding(true);
-    setImageSource(character.image_url ? 'url' : 'upload');
-  };
+    })
+    setIsAdding(true)
+    setImageSource(character.image_url ? "url" : "upload")
+  }
 
   const handleCancel = () => {
-    setIsAdding(false);
-    setEditingId(null);
-    setFormData(emptyFormData);
-    setImageSource('url');
-  };
+    setIsAdding(false)
+    setEditingId(null)
+    setFormData(emptyFormData)
+    setImageSource("url")
+  }
 
   const formatList = (items: { name: string }[]) =>
-    items.length > 0 ? items.map((item) => item.name).join(', ') : '-';
+    items.length > 0 ? items.map((item) => item.name).join(", ") : "-"
 
   return (
     <div className="character-table">
@@ -257,6 +271,9 @@ export default function CharacterTable({
         <h2>Characters</h2>
         {!isAdding && (
           <Button onClick={() => setIsAdding(true)}>
+            <span className="button__icon">
+              <Plus size={16} />
+            </span>
             Add Character
           </Button>
         )}
@@ -279,31 +296,33 @@ export default function CharacterTable({
                   <div className="character-form__toggle">
                     <button
                       type="button"
-                      className={imageSource === 'url' ? 'is-active' : ''}
+                      className={imageSource === "url" ? "is-active" : ""}
                       onClick={() => {
-                        setImageSource('url');
+                        setImageSource("url")
                         setFormData((current) => ({
                           ...current,
                           image_url: current.image_url || baseImageUrl,
-                        }));
+                        }))
                       }}
                     >
                       Use URL
                     </button>
                     <button
                       type="button"
-                      className={imageSource === 'upload' ? 'is-active' : ''}
-                      onClick={() => setImageSource('upload')}
+                      className={imageSource === "upload" ? "is-active" : ""}
+                      onClick={() => setImageSource("upload")}
                     >
                       Upload file
                     </button>
                   </div>
-                  {imageSource === 'url' ? (
+                  {imageSource === "url" ? (
                     <input
                       id="image_url"
                       type="url"
                       value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, image_url: e.target.value })
+                      }
                       placeholder={baseImageUrl}
                     />
                   ) : (
@@ -320,11 +339,14 @@ export default function CharacterTable({
                           })
                         }
                       />
-                      <label htmlFor="image_file" className="character-form__file-button">
+                      <label
+                        htmlFor="image_file"
+                        className="character-form__file-button"
+                      >
                         Choose file
                       </label>
                       <span className="character-form__file-name">
-                        {formData.image_file?.name || 'No file selected'}
+                        {formData.image_file?.name || "No file selected"}
                       </span>
                     </div>
                   )}
@@ -338,7 +360,9 @@ export default function CharacterTable({
                   id="name"
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -352,7 +376,7 @@ export default function CharacterTable({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      age: e.target.value === '' ? '' : Number(e.target.value),
+                      age: e.target.value === "" ? "" : Number(e.target.value),
                     })
                   }
                 />
@@ -365,7 +389,7 @@ export default function CharacterTable({
                 options={states}
                 selectedIds={formData.state_id ? [formData.state_id] : []}
                 onAdd={(id) => setFormData({ ...formData, state_id: id })}
-                onRemove={() => setFormData({ ...formData, state_id: '' })}
+                onRemove={() => setFormData({ ...formData, state_id: "" })}
                 single
               />
               <AttributePicker
@@ -373,55 +397,65 @@ export default function CharacterTable({
                 fieldKey="class_ids"
                 options={optionMaps.class_ids}
                 selectedIds={formData.class_ids}
-                onAdd={(id) => toggleSelection('class_ids', id)}
-                onRemove={(id) => toggleSelection('class_ids', id)}
+                onAdd={(id) => toggleSelection("class_ids", id)}
+                onRemove={(id) => toggleSelection("class_ids", id)}
               />
               <AttributePicker
                 label="Races"
                 fieldKey="race_ids"
                 options={optionMaps.race_ids}
                 selectedIds={formData.race_ids}
-                onAdd={(id) => toggleSelection('race_ids', id)}
-                onRemove={(id) => toggleSelection('race_ids', id)}
+                onAdd={(id) => toggleSelection("race_ids", id)}
+                onRemove={(id) => toggleSelection("race_ids", id)}
               />
               <AttributePicker
                 label="Occupations"
                 fieldKey="occupation_ids"
                 options={optionMaps.occupation_ids}
                 selectedIds={formData.occupation_ids}
-                onAdd={(id) => toggleSelection('occupation_ids', id)}
-                onRemove={(id) => toggleSelection('occupation_ids', id)}
+                onAdd={(id) => toggleSelection("occupation_ids", id)}
+                onRemove={(id) => toggleSelection("occupation_ids", id)}
               />
               <AttributePicker
                 label="Associations"
                 fieldKey="association_ids"
                 options={optionMaps.association_ids}
                 selectedIds={formData.association_ids}
-                onAdd={(id) => toggleSelection('association_ids', id)}
-                onRemove={(id) => toggleSelection('association_ids', id)}
+                onAdd={(id) => toggleSelection("association_ids", id)}
+                onRemove={(id) => toggleSelection("association_ids", id)}
               />
               <AttributePicker
                 label="Places"
                 fieldKey="place_ids"
                 options={optionMaps.place_ids}
                 selectedIds={formData.place_ids}
-                onAdd={(id) => toggleSelection('place_ids', id)}
-                onRemove={(id) => toggleSelection('place_ids', id)}
+                onAdd={(id) => toggleSelection("place_ids", id)}
+                onRemove={(id) => toggleSelection("place_ids", id)}
+              />
+            </div>
+            <div className="character-form__field">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={3}
+                placeholder="Optional description"
               />
             </div>
           </div>
-          <div className="character-form__field">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-            />
-          </div>
           <div className="character-form__actions">
-            <Button type="submit">{editingId ? 'Update' : 'Add'}</Button>
-            <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
+            <Button type="submit">
+              <span className="button__icon">
+                {editingId ? <Pencil size={16} /> : <Plus size={16} />}
+              </span>
+              {editingId ? "Update Character" : "Add Character"}
+            </Button>
+            <Button variant="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
           </div>
         </form>
       )}
@@ -430,62 +464,73 @@ export default function CharacterTable({
         <table className="character-table__table">
           <thead>
             <tr>
+              <th>Image</th>
               <th>Name</th>
+              <th>Description</th>
+              <th>Age</th>
               <th>State</th>
               <th>Classes</th>
               <th>Races</th>
               <th>Occupations</th>
               <th>Associations</th>
               <th>Places</th>
-              <th>Age</th>
-              <th>Description</th>
-              <th>Image</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {characters.map((character) => (
-              <tr key={character.id}>
-                <td>{character.name}</td>
-                <td>{character.state?.name || '-'}</td>
-                <td>{formatList(character.classes)}</td>
-                <td>{formatList(character.races)}</td>
-                <td>{formatList(character.occupations)}</td>
-                <td>{formatList(character.associations)}</td>
-                <td>{formatList(character.places)}</td>
-                <td>{character.age ?? '-'}</td>
-                <td>{character.description || '-'}</td>
-                <td>
-                  {character.image_url ? (
-                    <img
-                      src={character.image_url}
-                      alt={character.name}
-                      className="character-table__image-preview"
-                    />
-                  ) : (
-                    '-'
-                  )}
-                </td>
-                <td className="character-table__actions">
-                  <Button variant="secondary" onClick={() => handleEdit(character)}>
-                    Edit
-                  </Button>
-                  <Button variant="danger" onClick={() => onDelete(character.id)}>
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {characters.length === 0 && (
+            {characters.length === 0 ? (
               <tr>
                 <td colSpan={11} className="character-table__empty">
                   No characters found. Add one to get started!
                 </td>
               </tr>
+            ) : (
+              characters.map((character) => (
+                <tr key={character.id}>
+                  <td>
+                    {character.image_url ? (
+                      <img
+                        src={character.image_url}
+                        alt={character.name}
+                        className="character-table__image-preview"
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td>{character.name}</td>
+                  <td>{character.description || "-"}</td>
+                  <td>{character.age || "-"}</td>
+                  <td>{character.state?.name || "-"}</td>
+                  <td>{formatList(character.classes)}</td>
+                  <td>{formatList(character.races)}</td>
+                  <td>{formatList(character.occupations)}</td>
+                  <td>{formatList(character.associations)}</td>
+                  <td>{formatList(character.places)}</td>
+                  <td className="character-table__actions">
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleEdit(character)}
+                    >
+                      <span className="button__icon">
+                        <Pencil size={16} />
+                      </span>
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onClick={() => onDelete(character.id)}
+                    >
+                      <span className="button__icon">
+                        <Trash2 size={16} />
+                      </span>
+                    </Button>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
       </div>
     </div>
-  );
+  )
 }

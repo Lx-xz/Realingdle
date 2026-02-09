@@ -1,0 +1,95 @@
+.header-menu
+  position: relative
+  display: flex
+  align-items: center
+
+  &__trigger
+    width: 40px
+    height: 40px
+    border-radius: 12px
+    border: 1px solid var(--border)
+    background: #ffffff
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    padding: 0
+    transition: transform 0.2s ease, box-shadow 0.2s ease
+
+    &:hover
+      transition: 0.3s
+      border-color: var(--foreground)
+
+  &__avatar
+    width: 100%
+    height: 100%
+    object-fit: cover
+    border-radius: 12px
+
+    &--placeholder
+      display: inline-flex
+      align-items: center
+      justify-content: center
+      font-weight: 700
+      font-size: 16px
+      color: #4a4a4a
+
+  &__login
+    font-size: 13px
+    font-weight: 600
+    text-transform: uppercase
+    letter-spacing: 0.08em
+
+  &__dropdown
+    position: absolute
+    top: calc(100% + 10px)
+    right: 0
+    min-width: 180px
+    background: #ffffff
+    border: 1px solid var(--border)
+    border-radius: 14px
+    box-shadow: 0 12px 24px var(--shadow)
+    padding: 8px
+    display: grid
+    gap: 6px
+    z-index: 20
+    animation: menu-pop 0.2s ease
+
+  &__link
+    display: flex
+    align-items: center
+    gap: 10px
+    padding: 10px 12px
+    border-radius: 10px
+    font-size: 14px
+    font-weight: 600
+    color: #111111
+    text-align: left
+    transition: background 0.2s ease, transform 0.2s ease
+
+    &:hover
+      background: #f2f2f2
+
+    &--button
+      border: none
+      background: transparent
+      width: 100%
+      cursor: pointer
+      text-align: left
+
+  &__link--danger
+    color: var(--danger)
+
+    &:hover
+      background: rgba(183, 28, 28, 0.12)
+
+  &__icon
+    width: 18px
+    height: 18px
+
+  @keyframes menu-pop
+    from
+      opacity: 0
+      transform: translateY(-6px) scale(0.98)
+    to
+      opacity: 1
+      transform: translateY(0) scale(1)

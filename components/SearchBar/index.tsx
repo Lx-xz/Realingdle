@@ -1,65 +1,65 @@
-import { useEffect, useRef, useState } from 'react';
-import './SearchBar.css';
+import { useEffect, useRef, useState } from "react"
+import "./SearchBar.sass"
 
 interface SearchSuggestion {
-  name: string;
-  image_url?: string | null;
+  name: string
+  image_url?: string | null
 }
 
 interface SearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: (value: string) => void;
-  suggestions?: SearchSuggestion[];
-  onSelectSuggestion?: (value: string) => void;
-  noResultsText?: string;
-  placeholder?: string;
-  disabled?: boolean;
+  value: string
+  onChange: (value: string) => void
+  onSubmit: (value: string) => void
+  suggestions?: SearchSuggestion[]
+  onSelectSuggestion?: (value: string) => void
+  noResultsText?: string
+  placeholder?: string
+  disabled?: boolean
 }
 
-export default function SearchBar({ 
-  value, 
-  onChange, 
+export default function SearchBar({
+  value,
+  onChange,
   onSubmit,
   suggestions = [],
   onSelectSuggestion,
-  noResultsText = 'No results',
-  placeholder = 'Search character...',
-  disabled = false
+  noResultsText = "No results",
+  placeholder = "Search character...",
+  disabled = false,
 }: SearchBarProps) {
-  const fieldRef = useRef<HTMLDivElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const fieldRef = useRef<HTMLDivElement | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (value.trim()) {
-      onSubmit(value.trim());
-      setIsOpen(false);
+      onSubmit(value.trim())
+      setIsOpen(false)
     }
-  };
+  }
 
   const handlePick = (name: string) => {
-    onSelectSuggestion?.(name);
-    onSubmit(name);
-    setIsOpen(false);
-  };
+    onSelectSuggestion?.(name)
+    onSubmit(name)
+    setIsOpen(false)
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!fieldRef.current) return;
+      if (!fieldRef.current) return
       if (!fieldRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
-  const showDropdown = isOpen && value.trim().length > 0;
-  const hasSuggestions = suggestions.length > 0;
+  const showDropdown = isOpen && value.trim().length > 0
+  const hasSuggestions = suggestions.length > 0
 
   return (
     <form className="search-bar" onSubmit={handleSubmit}>
@@ -69,8 +69,8 @@ export default function SearchBar({
           className="search-bar__input"
           value={value}
           onChange={(e) => {
-            onChange(e.target.value);
-            setIsOpen(true);
+            onChange(e.target.value)
+            setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
@@ -98,7 +98,9 @@ export default function SearchBar({
                           {suggestion.name.charAt(0)}
                         </span>
                       )}
-                      <span className="search-bar__option-text">{suggestion.name}</span>
+                      <span className="search-bar__option-text">
+                        {suggestion.name}
+                      </span>
                     </button>
                   </li>
                 ))}
@@ -109,13 +111,6 @@ export default function SearchBar({
           </div>
         )}
       </div>
-      <button 
-        type="submit" 
-        className="search-bar__button"
-        disabled={disabled || !value.trim()}
-      >
-        Guess
-      </button>
     </form>
-  );
+  )
 }

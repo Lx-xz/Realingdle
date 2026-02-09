@@ -1,0 +1,89 @@
+.lookup-table
+  width: 100%
+
+  &__header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 24px
+
+    h2
+      font-size: 24px
+      font-weight: 700
+
+  &__form
+    background-color: #ffffff
+    padding: 24px
+    border-radius: 16px
+    margin-bottom: 24px
+    border: 1px solid var(--border)
+    animation: form-pop 0.24s ease
+
+  &__field
+    margin-bottom: 16px
+
+    label
+      display: block
+      margin-bottom: 8px
+      font-weight: 600
+      font-size: 14px
+
+    input
+      width: 100%
+      padding: 12px
+      border: 1px solid var(--border)
+      border-radius: 10px
+      font-size: 16px
+      outline: none
+      transition: border-color 0.2s ease, box-shadow 0.2s ease
+      background: #ffffff
+
+      &:focus
+        border-color: var(--primary)
+        box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.08)
+
+  &__actions
+    display: flex
+    gap: 12px
+
+  &__list
+    border: 1px solid var(--border)
+    border-radius: 16px
+    overflow: hidden
+    background: #ffffff
+
+  &__empty
+    padding: 48px 24px
+    text-align: center
+    color: #6b7280
+    font-style: italic
+
+  &__table
+    width: 100%
+    border-collapse: collapse
+
+    th
+      background-color: #f4f4f4
+      padding: 16px
+      text-align: left
+      font-weight: 600
+      font-size: 14px
+      text-transform: uppercase
+      letter-spacing: 0.5px
+      color: #5a5a5a
+
+    td
+      padding: 16px
+      border-top: 1px solid var(--border)
+
+  &__row-actions
+    display: flex
+    gap: 8px
+
+@keyframes form-pop
+  from
+    opacity: 0
+    transform: translateY(-8px)
+  to
+    opacity: 1
+    transform: translateY(0)

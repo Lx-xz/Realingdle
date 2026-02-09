@@ -1,20 +1,21 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import Button from './Button';
-import './LookupTable.css';
+import { useState } from "react"
+import { Pencil, Plus, Trash2 } from "lucide-react"
+import Button from "@/components/Button"
+import "./LookupTable.sass"
 
 interface LookupItem {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface LookupTableProps {
-  title: string;
-  items: LookupItem[];
-  onAdd: (name: string) => void;
-  onEdit: (id: string, name: string) => void;
-  onDelete: (id: string) => void;
+  title: string
+  items: LookupItem[]
+  onAdd: (name: string) => void
+  onEdit: (id: string, name: string) => void
+  onDelete: (id: string) => void
 }
 
 export default function LookupTable({
@@ -24,42 +25,47 @@ export default function LookupTable({
   onEdit,
   onDelete,
 }: LookupTableProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formValue, setFormValue] = useState('');
+  const [isAdding, setIsAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [formValue, setFormValue] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formValue.trim()) return;
+    e.preventDefault()
+    if (!formValue.trim()) return
 
     if (editingId) {
-      onEdit(editingId, formValue.trim());
-      setEditingId(null);
+      onEdit(editingId, formValue.trim())
+      setEditingId(null)
     } else {
-      onAdd(formValue.trim());
-      setIsAdding(false);
+      onAdd(formValue.trim())
+      setIsAdding(false)
     }
-    setFormValue('');
-  };
+    setFormValue("")
+  }
 
   const handleEdit = (item: LookupItem) => {
-    setEditingId(item.id);
-    setFormValue(item.name);
-    setIsAdding(true);
-  };
+    setEditingId(item.id)
+    setFormValue(item.name)
+    setIsAdding(true)
+  }
 
   const handleCancel = () => {
-    setIsAdding(false);
-    setEditingId(null);
-    setFormValue('');
-  };
+    setIsAdding(false)
+    setEditingId(null)
+    setFormValue("")
+  }
 
   return (
     <div className="lookup-table">
       <div className="lookup-table__header">
         <h2>{title}</h2>
         {!isAdding && (
-          <Button onClick={() => setIsAdding(true)}>Add {title.slice(0, -1)}</Button>
+          <Button onClick={() => setIsAdding(true)}>
+            <span className="button__icon">
+              <Plus size={16} />
+            </span>
+            Add {title.slice(0, -1)}
+          </Button>
         )}
       </div>
 
@@ -78,7 +84,12 @@ export default function LookupTable({
             />
           </div>
           <div className="lookup-table__actions">
-            <Button type="submit">{editingId ? 'Update' : 'Add'}</Button>
+            <Button type="submit">
+              <span className="button__icon">
+                {editingId ? <Pencil size={16} /> : <Plus size={16} />}
+              </span>
+              {editingId ? "Update" : "Add"}
+            </Button>
             <Button variant="secondary" onClick={handleCancel}>
               Cancel
             </Button>
@@ -105,10 +116,14 @@ export default function LookupTable({
                   <td>{item.name}</td>
                   <td className="lookup-table__row-actions">
                     <Button variant="secondary" onClick={() => handleEdit(item)}>
-                      Edit
+                      <span className="button__icon">
+                        <Pencil size={16} />
+                      </span>
                     </Button>
                     <Button variant="danger" onClick={() => onDelete(item.id)}>
-                      Delete
+                      <span className="button__icon">
+                        <Trash2 size={16} />
+                      </span>
                     </Button>
                   </td>
                 </tr>
@@ -118,5 +133,5 @@ export default function LookupTable({
         )}
       </div>
     </div>
-  );
+  )
 }

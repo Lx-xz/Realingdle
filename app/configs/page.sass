@@ -1,0 +1,107 @@
+.configs
+  padding: 0 12px
+    box-shadow: 0 18px 40px var(--shadow)
+
+  &__container
+    max-width: 1200px
+    margin: 0 auto
+    padding: 40px 0
+
+  &__header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 32px
+
+  &__title
+    font-size: 28px
+    font-weight: 700
+    text-align: center
+    margin-bottom: 28px
+    letter-spacing: 0.08em
+    text-transform: uppercase
+
+  &__form
+    display: flex
+    flex-direction: column
+    gap: 20px
+
+  &__field
+    display: flex
+    flex-direction: column
+    gap: 8px
+
+    label
+      font-weight: 600
+      font-size: 14px
+
+    input
+      padding: 12px
+      border: 1px solid var(--border)
+      border-radius: 10px
+      font-size: 16px
+      outline: none
+      transition: border-color 0.2s ease
+
+      &:focus
+        border-color: var(--primary)
+
+  &__error
+    color: var(--danger)
+    font-size: 14px
+    font-weight: 500
+    text-align: center
+
+  &__actions
+    display: flex
+    gap: 12px
+    margin-top: 8px
+
+  &__tabs
+    display: flex
+    gap: 8px
+    margin-bottom: 24px
+    background: #ffffff
+    border: 1px solid var(--border)
+    border-radius: 16px
+    padding: 8px
+    flex-wrap: wrap
+
+  &__tab
+    padding: 12px 24px
+    border: none
+    background: transparent
+    border-radius: 12px
+    font-size: 14px
+    font-weight: 600
+    color: #6b6b6b
+    cursor: pointer
+    transition: all 0.2s ease
+    text-transform: uppercase
+    letter-spacing: 0.05em
+
+    &:hover
+      background: #f3f3f3
+      color: #111111
+
+    &--active
+      background: var(--primary)
+      color: #ffffff
+
+      &:hover
+        background: var(--primary-hover)
+        color: #ffffff
+
+  &__content
+    background: #ffffff
+    border: 1px solid var(--border)
+    border-radius: 16px
+    padding: 32px
+
+  &__loading
+    background: #ffffff
+    border: 1px solid var(--border)
+    border-radius: 16px
+    padding: 48px
+    text-align: center
+    color: #6b6b6b
