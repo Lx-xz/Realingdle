@@ -1,0 +1,94 @@
+.lookup-table {
+  width: 100%;
+}
+
+.lookup-table__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.lookup-table__header h2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.lookup-table__form {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+
+.lookup-table__field {
+  margin-bottom: 16px;
+}
+
+.lookup-table__field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.lookup-table__field input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  background: #ffffff;
+}
+
+.lookup-table__field input:focus {
+  border-color: var(--primary);
+}
+
+.lookup-table__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.lookup-table__list {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.lookup-table__empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.lookup-table__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lookup-table__table th {
+  background-color: #f4f4f4;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #5a5a5a;
+}
+
+.lookup-table__table td {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.lookup-table__row-actions {
+  display: flex;
+  gap: 8px;
+}

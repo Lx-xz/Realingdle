@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CharacterTable from '@/components/CharacterTable';
+import LookupTable from '@/components/LookupTable';
+import UserProfile from '@/components/UserProfile';
 import Button from '@/components/Button';
 import { supabase } from '@/lib/supabase';
 import { fetchCharacters } from '@/lib/characters';
@@ -18,12 +20,15 @@ import {
 } from '@/types';
 import './page.css';
 
+type TabType = 'characters' | 'states' | 'classes' | 'races' | 'occupations' | 'associations' | 'places';
+
 export default function ConfigsPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<TabType>('characters');
   const [characters, setCharacters] = useState<Character[]>([]);
   const [states, setStates] = useState<State[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
@@ -256,6 +261,48 @@ export default function ConfigsPage() {
     }
   };
 
+  // Lookup table CRUD handlers
+  const createLookupHandlers = (table: string, setter: (data: any[]) => void) => ({
+    onAdd: async (name: string) => {
+      try {
+        const { error } = await supabase.from(table).insert([{ name }]);
+        if (error) throw error;
+        await fetchLookups();
+      } catch (error) {
+        console.error(`Error adding ${table}:`, error);
+        alert(`Error adding ${table}. Please try again.`);
+      }
+    },
+    onEdit: async (id: string, name: string) => {
+      try {
+        const { error } = await supabase.from(table).update({ name }).eq('id', id);
+        if (error) throw error;
+        await fetchLookups();
+      } catch (error) {
+        console.error(`Error updating ${table}:`, error);
+        alert(`Error updating ${table}. Please try again.`);
+      }
+    },
+    onDelete: async (id: string) => {
+      if (!confirm(`Are you sure you want to delete this item?`)) return;
+      try {
+        const { error } = await supabase.from(table).delete().eq('id', id);
+        if (error) throw error;
+        await fetchLookups();
+      } catch (error) {
+        console.error(`Error deleting ${table}:`, error);
+        alert(`Error deleting ${table}. Please try again.`);
+      }
+    },
+  });
+
+  const stateHandlers = createLookupHandlers('states', setStates);
+  const classHandlers = createLookupHandlers('classes', setClasses);
+  const raceHandlers = createLookupHandlers('races', setRaces);
+  const occupationHandlers = createLookupHandlers('occupations', setOccupations);
+  const associationHandlers = createLookupHandlers('associations', setAssociations);
+  const placeHandlers = createLookupHandlers('places', setPlaces);
+
   if (!isAuthenticated) {
     return (
       <div className="configs">
@@ -303,29 +350,131 @@ export default function ConfigsPage() {
     <div className="configs">
       <div className="configs__container">
         <div className="configs__header">
-          <h1 className="configs__title">Character Management</h1>
-          <Button variant="secondary" onClick={handleLogout}>
-            Logout
-          </Button>
+          <h1 className="configs__title">Admin Dashboard</h1>
         </div>
 
         {error && <p className="configs__error">{error}</p>}
 
+        <UserProfile onLogout={handleLogout} />
+
+        <div className="configs__tabs">
+          <button
+            className={`configs__tab ${activeTab === 'characters' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('characters')}
+          >
+            Characters
+          </button>
+          <button
+            className={`configs__tab ${activeTab === 'states' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('states')}
+          >
+            States
+          </button>
+          <button
+            className={`configs__tab ${activeTab === 'classes' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('classes')}
+          >
+            Classes
+          </button>
+          <button
+            className={`configs__tab ${activeTab === 'races' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('races')}
+          >
+            Races
+          </button>
+          <button
+            className={`configs__tab ${activeTab === 'occupations' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('occupations')}
+          >
+            Occupations
+          </button>
+          <button
+            className={`configs__tab ${activeTab === 'associations' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('associations')}
+          >
+            Associations
+          </button>
+          <button
+            className={`configs__tab ${activeTab === 'places' ? 'configs__tab--active' : ''}`}
+            onClick={() => setActiveTab('places')}
+          >
+            Places
+          </button>
+        </div>
+
         {loading ? (
-          <p>Loading characters...</p>
+          <div className="configs__loading">Loading data...</div>
         ) : (
-          <CharacterTable
-            characters={characters}
-            states={states}
-            classes={classes}
-            races={races}
-            occupations={occupations}
-            associations={associations}
-            places={places}
-            onAdd={handleAddCharacter}
-            onEdit={handleEditCharacter}
-            onDelete={handleDeleteCharacter}
-          />
+          <div className="configs__content">
+            {activeTab === 'characters' && (
+              <CharacterTable
+                characters={characters}
+                states={states}
+                classes={classes}
+                races={races}
+                occupations={occupations}
+                associations={associations}
+                places={places}
+                onAdd={handleAddCharacter}
+                onEdit={handleEditCharacter}
+                onDelete={handleDeleteCharacter}
+              />
+            )}
+            {activeTab === 'states' && (
+              <LookupTable
+                title="States"
+                items={states}
+                onAdd={stateHandlers.onAdd}
+                onEdit={stateHandlers.onEdit}
+                onDelete={stateHandlers.onDelete}
+              />
+            )}
+            {activeTab === 'classes' && (
+              <LookupTable
+                title="Classes"
+                items={classes}
+                onAdd={classHandlers.onAdd}
+                onEdit={classHandlers.onEdit}
+                onDelete={classHandlers.onDelete}
+              />
+            )}
+            {activeTab === 'races' && (
+              <LookupTable
+                title="Races"
+                items={races}
+                onAdd={raceHandlers.onAdd}
+                onEdit={raceHandlers.onEdit}
+                onDelete={raceHandlers.onDelete}
+              />
+            )}
+            {activeTab === 'occupations' && (
+              <LookupTable
+                title="Occupations"
+                items={occupations}
+                onAdd={occupationHandlers.onAdd}
+                onEdit={occupationHandlers.onEdit}
+                onDelete={occupationHandlers.onDelete}
+              />
+            )}
+            {activeTab === 'associations' && (
+              <LookupTable
+                title="Associations"
+                items={associations}
+                onAdd={associationHandlers.onAdd}
+                onEdit={associationHandlers.onEdit}
+                onDelete={associationHandlers.onDelete}
+              />
+            )}
+            {activeTab === 'places' && (
+              <LookupTable
+                title="Places"
+                items={places}
+                onAdd={placeHandlers.onAdd}
+                onEdit={placeHandlers.onEdit}
+                onDelete={placeHandlers.onDelete}
+              />
+            )}
+          </div>
         )}
       </div>
     </div>
