@@ -1,4 +1,6 @@
-:HL["/realingdle/_next/static/chunks/2f10dc81f51e69e0.css","style"]
+:HL["/realingdle/_next/static/chunks/67bdbf00a972a1e7.css","style"]
+:HL["/realingdle/_next/static/chunks/376092fd837f1a15.css","style"]
+:HL["/realingdle/_next/static/chunks/55e43371a0b3fa26.css","style"]
 :HL["/realingdle/_next/static/chunks/9b1cf1d998d32b85.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap","style"]
-0:{"buildId":"pdQQjDZrpJDtx1DNjjpVG","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"profile","paramType":null,"paramKey":"profile","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"P8gtltG7rX10TP0hX4de1","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"profile","paramType":null,"paramKey":"profile","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
