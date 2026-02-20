@@ -6,6 +6,7 @@ import SearchBar from "@/components/SearchBar"
 import LifeBar from "@/components/LifeBar"
 import Button from "@/components/Button"
 import { fetchCharacters } from "@/lib/characters"
+import { incrementGamesPlayedDirect, incrementWinsDirect } from "@/lib/profile"
 import { supabase } from "@/lib/supabase"
 import { Character } from "@/types"
 import "./page.sass"
@@ -49,55 +50,55 @@ export default function GamePage() {
 
   const fetchCharacterOfDay = async () => {
     try {
-      const data = await fetchCharacters({ ascending: true })
-      setAllCharacters(data)
+      // Busca o personagem do dia do servidor
+      const response = await fetch("/api/daily-character")
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("API Error:", errorData)
+        throw new Error(`Failed to fetch daily character: ${response.status}`)
+      }
 
-      if (data.length > 0) {
-        // Select a character based on the day (simple implementation)
-        const dayOfYear = Math.floor(
-          (new Date().getTime() -
-            new Date(new Date().getFullYear(), 0, 0).getTime()) /
-            86400000,
-        )
-        const characterIndex = dayOfYear % data.length
-        const selectedCharacter = data[characterIndex]
-        setCharacterOfDay(selectedCharacter)
+      const selectedCharacter = await response.json()
+      setCharacterOfDay(selectedCharacter)
 
-        if (typeof window !== "undefined") {
-          const raw = window.localStorage.getItem(storageKey)
-          if (raw) {
-            try {
-              const saved = JSON.parse(raw) as {
-                dateKey: string
-                characterId: string
-                guesses: string[]
-                lives: number
-                gameOver: boolean
-                won: boolean
-              }
+      // Busca todos os personagens para o searchbar
+      const allCharactersData = await fetchCharacters({ ascending: true })
+      setAllCharacters(allCharactersData)
 
-              if (
-                saved.dateKey === getTodayKey() &&
-                saved.characterId === selectedCharacter.id
-              ) {
-                setGuesses(saved.guesses)
-                setLives(saved.lives)
-                setGameOver(saved.gameOver)
-                setWon(saved.won)
-              } else {
-                window.localStorage.removeItem(storageKey)
-              }
-            } catch {
+      if (typeof window !== "undefined") {
+        const raw = window.localStorage.getItem(storageKey)
+        if (raw) {
+          try {
+            const saved = JSON.parse(raw) as {
+              dateKey: string
+              characterId: string
+              guesses: string[]
+              lives: number
+              gameOver: boolean
+              won: boolean
+            }
+
+            if (
+              saved.dateKey === getTodayKey() &&
+              saved.characterId === selectedCharacter.id
+            ) {
+              setGuesses(saved.guesses)
+              setLives(saved.lives)
+              setGameOver(saved.gameOver)
+              setWon(saved.won)
+            } else {
               window.localStorage.removeItem(storageKey)
             }
+          } catch {
+            window.localStorage.removeItem(storageKey)
           }
         }
       }
     } catch (error) {
       console.error("Error fetching character:", error)
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -113,7 +114,7 @@ export default function GamePage() {
     window.localStorage.setItem(storageKey, JSON.stringify(payload))
   }, [characterOfDay, guesses, lives, gameOver, won])
 
-  const handleGuess = (guess: string) => {
+  const handleGuess = async (guess: string) => {
     if (gameOver || !characterOfDay) return
 
     const matchedCharacter = allCharacters.find(
@@ -126,6 +127,20 @@ export default function GamePage() {
     }
 
     const newGuesses = [...guesses, matchedCharacter.name]
+    const isFirstGuess = guesses.length === 0
+
+    // Se é o primeiro chute, incrementa games_played
+    if (isFirstGuess) {
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (sessionData.session?.user?.id) {
+        try {
+          await incrementGamesPlayedDirect(sessionData.session.user.id)
+        } catch (error) {
+          console.error("Failed to increment games_played:", error)
+        }
+      }
+    }
+
     setGuesses(newGuesses)
 
     // Check if the guess is correct (case-insensitive)
@@ -134,6 +149,16 @@ export default function GamePage() {
     ) {
       setWon(true)
       setGameOver(true)
+
+      // Se ganhou, incrementa wins
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (sessionData.session?.user?.id) {
+        try {
+          await incrementWinsDirect(sessionData.session.user.id)
+        } catch (error) {
+          console.error("Failed to increment wins:", error)
+        }
+      }
     } else {
       const newLives = lives - 1
       setLives(newLives)
