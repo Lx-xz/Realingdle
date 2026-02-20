@@ -22,16 +22,23 @@
   &__track
     background-color: #eeeeee
     position: absolute
-    height: auto
-    width: var(--scroll-track-size)
     border-radius: 999px
 
     &:hover .scroll-area__thumb
       opacity: 1
 
+    &:not(.scroll-area__track--x)
+      height: 100%
+      width: var(--scroll-track-size)
+      top: 0 !important
+      left: calc(100% + 0.25rem) !important
+      
     &--x
       height: var(--scroll-track-size)
-      width: auto
+      width: 100%
+      left: 0
+      bottom: calc(100% + 0.25rem) !important
+      top: auto !important
 
   &__thumb
     width: 100%
@@ -66,8 +73,4 @@
   .scroll-area__track
     right: 6px
     top: 6px
-    bottom: 6px
-
-  .scroll-area__track--x
-    top: auto
     bottom: 6px

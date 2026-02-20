@@ -257,16 +257,6 @@ export default function ScrollArea({
 
   return (
     <div className={`scroll-area ${className}`} ref={rootRef} style={rootStyle}>
-      <div
-        className="scroll-area__viewport"
-        ref={contentRef}
-        style={contentStyle}
-      >
-        <div className="scroll-area__content">{children}</div>
-      </div>
-      <div className="scroll-area__track" ref={trackRef}>
-        <div className="scroll-area__thumb" ref={thumbRef} />
-      </div>
       {showHorizontal && (
         <div
           className="scroll-area__track scroll-area__track--x"
@@ -278,6 +268,16 @@ export default function ScrollArea({
           />
         </div>
       )}
+      <div
+        className="scroll-area__viewport"
+        ref={contentRef}
+        style={contentStyle}
+      >
+        <div className="scroll-area__content">{children}</div>
+      </div>
+      <div className="scroll-area__track" ref={trackRef}>
+        <div className="scroll-area__thumb" ref={thumbRef} />
+      </div>
     </div>
   )
 }

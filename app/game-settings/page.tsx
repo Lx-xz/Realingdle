@@ -1148,7 +1148,6 @@ export default function GameSettingsPage() {
                   <div className="character-table__scroll-shell">
                     <ScrollArea
                       className="character-table__table-scroll"
-                      maxHeight={520}
                       showHorizontal
                     >
                       <div className="character-table__table-clip">

@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut, Settings, User } from "lucide-react"
+import { LogOut, Settings, User, Trophy, Award } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import "./HeaderMenu.sass"
 
 export default function HeaderMenu() {
   const router = useRouter()
   const [sessionUser, setSessionUser] = useState<any>(null)
+  const [displayName, setDisplayName] = useState<string | null>(null)
+  const [wins, setWins] = useState<number>(0)
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
 
@@ -17,12 +19,34 @@ export default function HeaderMenu() {
     const syncSession = async () => {
       const { data } = await supabase.auth.getSession()
       setSessionUser(data.session?.user ?? null)
+      
+      if (data.session?.user?.id) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", data.session.user.id)
+          .single()
+        
+        setDisplayName(profile?.display_name ?? null)
+      }
     }
 
     syncSession()
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      async (_event, currentSession) => {
         setSessionUser(currentSession?.user ?? null)
+        
+        if (currentSession?.user?.id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("display_name")
+            .eq("id", currentSession.user.id)
+            .single()
+          
+          setDisplayName(profile?.display_name ?? null)
+        } else {
+          setDisplayName(null)
+        }
       },
     )
 
@@ -58,6 +82,18 @@ export default function HeaderMenu() {
   return (
     <div className="header-menu" ref={menuRef}>
       {sessionUser ? (
+      <>
+        <div className="header-menu__display-rank">
+          <Trophy className="header-menu__icon" />
+          {sessionUser ? "N/A" : "Login to see"}
+        </div>
+        <div className="header-menu__display-wins">
+          <Award className="header-menu__icon" />
+          {wins}
+        </div>
+        <span className="header-menu__display-name">
+          {displayName}
+        </span>
         <button
           type="button"
           className="header-menu__trigger"
@@ -76,6 +112,7 @@ export default function HeaderMenu() {
             </span>
           )}
         </button>
+      </>
       ) : (
         <Link className="header-menu__login" href="/auth?next=/profile">
           Login
