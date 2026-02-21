@@ -1,7 +1,7 @@
-:HL["/realingdle/_next/static/chunks/67bdbf00a972a1e7.css","style"]
-:HL["/realingdle/_next/static/chunks/376092fd837f1a15.css","style"]
-:HL["/realingdle/_next/static/chunks/55e43371a0b3fa26.css","style"]
+:HL["/realingdle/_next/static/chunks/c7b5d1d7869ac301.css","style"]
+:HL["/realingdle/_next/static/chunks/59376b4f7cef747c.css","style"]
+:HL["/realingdle/_next/static/chunks/74c1ebedb3061baa.css","style"]
 :HL["/realingdle/_next/static/chunks/e9883df29745ad7f.css","style"]
-:HL["/realingdle/_next/static/chunks/06b1f07848e8847a.css","style"]
+:HL["/realingdle/_next/static/chunks/75f76fd8f3588bd0.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap","style"]
-0:{"buildId":"P8gtltG7rX10TP0hX4de1","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"game-settings","paramType":null,"paramKey":"game-settings","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"5PbJ3cqoqilUh4vff_-OS","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"game-settings","paramType":null,"paramKey":"game-settings","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
