@@ -33,6 +33,34 @@ export default function ScrollArea({
     if (!root || !content || !track || !thumb) return
 
     let frame = 0
+    const HORIZONTAL_EPSILON = 2
+
+    const getHorizontalMetrics = () => {
+      const trackX = trackXRef.current
+      const thumbX = thumbXRef.current
+      if (!trackX || !thumbX) return null
+
+      const scrollWidth = content.scrollWidth
+      const clientWidth = content.clientWidth
+      const scrollLeft = content.scrollLeft
+      const scrollableX = Math.max(0, scrollWidth - clientWidth)
+
+      const viewportOffsetLeft = Math.max(0, content.offsetLeft)
+      const viewportWidth = Math.max(0, clientWidth)
+
+      trackX.style.left = `${viewportOffsetLeft}px`
+      trackX.style.width = `${viewportWidth}px`
+
+      return {
+        trackX,
+        thumbX,
+        scrollWidth,
+        clientWidth,
+        scrollLeft,
+        scrollableX,
+        trackWidth: Math.max(0, viewportWidth),
+      }
+    }
 
     const updateThumb = () => {
       if (frame) cancelAnimationFrame(frame)
@@ -45,30 +73,39 @@ export default function ScrollArea({
         const scrollable = scrollHeight - clientHeight
         const shouldHide = scrollable <= 1
 
+        track.style.visibility = shouldHide ? "hidden" : "visible"
         track.style.opacity = shouldHide ? "0" : "1"
         track.style.pointerEvents = shouldHide ? "none" : "auto"
 
-        if (shouldHide) return
+        if (!shouldHide) {
+          const thumbHeight = Math.max(
+            (clientHeight / scrollHeight) * trackHeight,
+            24,
+          )
+          const maxThumbTop = trackHeight - thumbHeight
+          const thumbTop =
+            maxThumbTop > 0 ? (scrollTop / scrollable) * maxThumbTop : 0
 
-        const thumbHeight = Math.max(
-          (clientHeight / scrollHeight) * trackHeight,
-          24,
-        )
-        const maxThumbTop = trackHeight - thumbHeight
-        const thumbTop =
-          maxThumbTop > 0 ? (scrollTop / scrollable) * maxThumbTop : 0
-
-        thumb.style.height = `${thumbHeight}px`
-        thumb.style.transform = `translateY(${thumbTop}px)`
+          thumb.style.height = `${thumbHeight}px`
+          thumb.style.transform = `translateY(${thumbTop}px)`
+        }
 
         if (showHorizontal && trackX && thumbX) {
-          const scrollWidth = content.scrollWidth
-          const clientWidth = content.clientWidth
-          const scrollLeft = content.scrollLeft
-          const trackWidth = trackX.clientWidth
-          const scrollableX = scrollWidth - clientWidth
-          const shouldHideX = scrollableX <= 1
+          const metrics = getHorizontalMetrics()
+          if (!metrics) return
 
+          const {
+            trackX,
+            thumbX,
+            scrollWidth,
+            clientWidth,
+            scrollLeft,
+            trackWidth,
+            scrollableX,
+          } = metrics
+          const shouldHideX = scrollableX <= HORIZONTAL_EPSILON
+
+          trackX.style.visibility = shouldHideX ? "hidden" : "visible"
           trackX.style.opacity = shouldHideX ? "0" : "1"
           trackX.style.pointerEvents = shouldHideX ? "none" : "auto"
 
@@ -78,8 +115,14 @@ export default function ScrollArea({
               32,
             )
             const maxThumbLeft = trackWidth - thumbWidth
+            const normalizedScrollLeft = Math.min(
+              Math.max(scrollLeft, 0),
+              scrollableX,
+            )
             const thumbLeft =
-              maxThumbLeft > 0 ? (scrollLeft / scrollableX) * maxThumbLeft : 0
+              maxThumbLeft > 0
+                ? (normalizedScrollLeft / scrollableX) * maxThumbLeft
+                : 0
 
             thumbX.style.width = `${thumbWidth}px`
             thumbX.style.transform = `translateX(${thumbLeft}px)`
@@ -184,10 +227,11 @@ export default function ScrollArea({
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
         if (!draggingX) return
-        const trackWidth = trackX.clientWidth
+        const metrics = getHorizontalMetrics()
+        if (!metrics) return
+        const { trackWidth, thumbX, scrollableX: scrollable } = metrics
         const thumbWidth = thumbX.clientWidth
         const maxThumbLeft = trackWidth - thumbWidth
-        const scrollable = content.scrollWidth - content.clientWidth
 
         if (scrollable <= 0 || maxThumbLeft <= 0) return
 
@@ -211,12 +255,14 @@ export default function ScrollArea({
 
     const handleTrackPointerDownX = (event: PointerEvent) => {
       if (!trackX || !thumbX || event.target === thumbX) return
+      const metrics = getHorizontalMetrics()
+      if (!metrics) return
+
       const rect = trackX.getBoundingClientRect()
       const clickX = event.clientX - rect.left
-      const trackWidth = rect.width
-      const thumbWidth = thumbX.clientWidth
-      const maxThumbLeft = trackWidth - thumbWidth
-      const scrollable = content.scrollWidth - content.clientWidth
+      const thumbWidth = metrics.thumbX.clientWidth
+      const maxThumbLeft = metrics.trackWidth - thumbWidth
+      const scrollable = metrics.scrollableX
 
       if (scrollable <= 0 || maxThumbLeft <= 0) return
 

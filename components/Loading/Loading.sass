@@ -1,0 +1,37 @@
+.loading
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 10px
+  color: #1a1a1a
+
+  &__icon
+    width: 20px
+    height: 20px
+    animation: sword-spin-pause 2s linear infinite
+    transform-origin: 50% 50%
+
+  &__label
+    font-weight: 600
+    font-size: 14px
+
+  &--compact
+    gap: 8px
+
+    .loading__icon
+      width: 16px
+      height: 16px
+
+    .loading__label
+      font-size: 13px
+
+  &--light
+    color: #d9d9d9
+
+@keyframes sword-spin-pause
+  0%
+    transform: rotate(0deg)
+  50%
+    transform: rotate(360deg)
+  100%
+    transform: rotate(360deg)

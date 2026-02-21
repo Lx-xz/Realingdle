@@ -4,7 +4,10 @@ import { useEffect, useState } from "react"
 import type { FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil } from "lucide-react"
+import { useAuthSession } from "@/components/AuthSessionProvider"
 import { supabase } from "@/lib/supabase"
+import Loading from "@/components/Loading"
+import Button from "@/components/Button"
 import "./page.sass"
 
 interface ProfileRow {
@@ -15,8 +18,58 @@ interface ProfileRow {
   wins: number
 }
 
+const withTimeout = async <T,>(
+  promise: Promise<T> | PromiseLike<T>,
+  timeoutMs: number,
+  label: string,
+) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race<T>([
+      Promise.resolve(promise),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out`))
+        }, timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
+}
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+
+const withRetry = async <T,>(
+  run: () => Promise<T>,
+  attempts: number,
+  label: string,
+) => {
+  let lastError: unknown
+  for (let index = 0; index < attempts; index += 1) {
+    try {
+      return await run()
+    } catch (error) {
+      lastError = error
+      if (index < attempts - 1) {
+        await sleep(350 * 2 ** index)
+      }
+    }
+  }
+
+  throw new Error(
+    `${label} failed after ${attempts} attempts: ${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    }`,
+  )
+}
+
 export default function ProfilePage() {
   const router = useRouter()
+  const { user: sessionUser, isLoading: isSessionLoading } = useAuthSession()
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<ProfileRow | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -30,6 +83,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [avatarMode, setAvatarMode] = useState<"url" | "upload">("url")
@@ -44,11 +98,20 @@ export default function ProfilePage() {
   }
 
   const loadProfile = async (sessionUser: any) => {
-    const { data, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, display_name, avatar_url, games_played, wins")
-      .eq("id", sessionUser.id)
-      .maybeSingle()
+    const { data, error: profileError } = await withRetry(
+      () =>
+        withTimeout(
+          supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url, games_played, wins")
+            .eq("id", sessionUser.id)
+            .maybeSingle(),
+          5500,
+          "Profile fetch",
+        ),
+      1,
+      "Profile fetch",
+    )
 
     if (profileError) {
       console.error("Error loading profile", profileError)
@@ -57,17 +120,26 @@ export default function ProfilePage() {
 
     if (!data) {
       const guestName = `Guest-${sessionUser.id.slice(0, 6)}`
-      const { data: created, error: insertError } = await supabase
-        .from("profiles")
-        .insert({
-          id: sessionUser.id,
-          display_name: guestName,
-          avatar_url: sessionUser.user_metadata?.avatar_url ?? null,
-          games_played: 0,
-          wins: 0,
-        })
-        .select("id, display_name, avatar_url, games_played, wins")
-        .single()
+      const { data: created, error: insertError } = await withRetry(
+        () =>
+          withTimeout(
+            supabase
+              .from("profiles")
+              .insert({
+                id: sessionUser.id,
+                display_name: guestName,
+                avatar_url: sessionUser.user_metadata?.avatar_url ?? null,
+                games_played: 0,
+                wins: 0,
+              })
+              .select("id, display_name, avatar_url, games_played, wins")
+              .single(),
+            5500,
+            "Profile create",
+          ),
+        1,
+        "Profile create",
+      )
 
       if (insertError) {
         console.error("Error creating profile", insertError)
@@ -96,20 +168,31 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    const loadSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (!data.session) {
-        router.replace("/auth?next=/profile")
-        return
-      }
-      const sessionUser = data.session.user
-      setUser(sessionUser)
-      await loadProfile(sessionUser)
-      setLoading(false)
+    if (isSessionLoading) {
+      return
     }
 
-    loadSession()
-  }, [router])
+    if (!sessionUser) {
+      router.replace("/auth?next=/profile")
+      return
+    }
+
+    const loadCurrentProfile = async () => {
+      setLoading(true)
+      setLoadError("")
+      try {
+        setUser(sessionUser)
+        await loadProfile(sessionUser)
+      } catch (error) {
+        console.error("Error loading profile page:", error)
+        setLoadError("Unable to load profile right now. Please try again.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadCurrentProfile()
+  }, [router, sessionUser, isSessionLoading])
 
   useEffect(() => {
     if (!isEditing) {
@@ -137,7 +220,22 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="profile">
-        <div className="profile__card">Loading profile...</div>
+        <div className="profile__card">
+          <Loading label="Loading profile..." />
+        </div>
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div className="profile">
+        <div className="profile__card">
+          <p>{loadError}</p>
+          <Button type="button" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+        </div>
       </div>
     )
   }

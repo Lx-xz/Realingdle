@@ -3,9 +3,12 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Check, Eye, Pencil, Plus, Trash2 } from "lucide-react"
+import Cropper, { Area, Point } from "react-easy-crop"
+import { useAuthSession } from "@/components/AuthSessionProvider"
 import Button from "@/components/Button"
 import DataTable from "@/components/DataTable"
 import ScrollArea from "@/components/ScrollArea"
+import Loading from "@/components/Loading"
 import { supabase } from "@/lib/supabase"
 import { fetchCharacters } from "@/lib/characters"
 import {
@@ -60,8 +63,116 @@ const defaultCharacterColumns = characterColumnOptions.map((column) =>
   column.key,
 )
 
+const createImage = (url: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.addEventListener("load", () => resolve(image))
+    image.addEventListener("error", (error) => reject(error))
+    image.setAttribute("crossOrigin", "anonymous")
+    image.src = url
+  })
+
+const getCroppedImageFile = async (
+  imageSrc: string,
+  pixelCrop: Area,
+  fileName: string,
+) => {
+  const image = await createImage(imageSrc)
+  const canvas = document.createElement("canvas")
+  const context = canvas.getContext("2d")
+
+  if (!context) {
+    throw new Error("Unable to create crop canvas")
+  }
+
+  canvas.width = pixelCrop.width
+  canvas.height = pixelCrop.height
+
+  context.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height,
+  )
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((result) => resolve(result), "image/jpeg", 0.92)
+  })
+
+  if (!blob) {
+    throw new Error("Failed to generate cropped image")
+  }
+
+  return new File([blob], fileName, { type: "image/jpeg" })
+}
+
+const buildPlaceholderImageUrl = (name: string) => {
+  const firstName = name.trim().split(/\s+/)[0] || "Character"
+  return `https://placehold.co/400x500?text=${encodeURIComponent(firstName)}`
+}
+
+const isPlaceholderImageUrl = (url: string) =>
+  url.trim().startsWith("https://placehold.co/400x500?text=") ||
+  url.trim().startsWith("https://placehold.co/4:5?text=") ||
+  url.trim().startsWith("https://placehold.co/200x400?text=")
+
+const withTimeout = async <T,>(
+  promise: Promise<T> | PromiseLike<T>,
+  timeoutMs: number,
+  label: string,
+) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race<T>([
+      Promise.resolve(promise),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out`))
+        }, timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
+}
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+
+const withRetry = async <T,>(
+  run: () => Promise<T>,
+  attempts: number,
+  label: string,
+) => {
+  let lastError: unknown
+  for (let index = 0; index < attempts; index += 1) {
+    try {
+      return await run()
+    } catch (error) {
+      lastError = error
+      if (index < attempts - 1) {
+        await sleep(400 * 2 ** index)
+      }
+    }
+  }
+
+  throw new Error(
+    `${label} failed after ${attempts} attempts: ${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    }`,
+  )
+}
+
 export default function GameSettingsPage() {
   const router = useRouter()
+  const { user: sessionUser, isLoading: isSessionLoading } = useAuthSession()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [error, setError] = useState("")
@@ -82,8 +193,13 @@ export default function GameSettingsPage() {
   const [characterFormData, setCharacterFormData] =
     useState<CharacterFormData>(emptyCharacterFormData)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  const [imageSource, setImageSource] = useState<"url" | "upload">("url")
   const [imagePreview, setImagePreview] = useState<string>("")
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
+  const [cropImageName, setCropImageName] = useState("character.jpg")
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false)
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [detailCharacter, setDetailCharacter] = useState<Character | null>(null)
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false)
   const [visibleCharacterColumns, setVisibleCharacterColumns] = useState(
@@ -93,7 +209,6 @@ export default function GameSettingsPage() {
   const [lookupEditingId, setLookupEditingId] = useState<string | null>(null)
   const [lookupFormValue, setLookupFormValue] = useState("")
   const columnMenuRef = useRef<HTMLDivElement | null>(null)
-  const baseImageUrl = "https://placehold.co/200x400?text="
   const columnStorageKey = "realingdle:character-columns"
 
   const optionMaps = useMemo(
@@ -108,14 +223,7 @@ export default function GameSettingsPage() {
   )
 
   useEffect(() => {
-    if (imageSource === "url" && !characterFormData.image_url) {
-      setCharacterFormData((current) => ({
-        ...current,
-        image_url: baseImageUrl,
-      }))
-    }
-
-    if (imageSource === "upload" && characterFormData.image_file) {
+    if (characterFormData.image_file) {
       const previewUrl = URL.createObjectURL(characterFormData.image_file)
       setImagePreview(previewUrl)
       return () => {
@@ -123,13 +231,22 @@ export default function GameSettingsPage() {
       }
     }
 
-    if (imageSource === "url" && characterFormData.image_url.trim()) {
-      setImagePreview(characterFormData.image_url.trim())
+    if (characterFormData.image_url.trim()) {
+      const currentImageUrl = characterFormData.image_url.trim()
+      setImagePreview(
+        isPlaceholderImageUrl(currentImageUrl)
+          ? buildPlaceholderImageUrl(characterFormData.name)
+          : currentImageUrl,
+      )
       return
     }
 
-    setImagePreview("")
-  }, [imageSource, characterFormData.image_file, characterFormData.image_url])
+    setImagePreview(buildPlaceholderImageUrl(characterFormData.name))
+  }, [
+    characterFormData.image_file,
+    characterFormData.image_url,
+    characterFormData.name,
+  ])
 
   useEffect(() => {
     if (!isColumnMenuOpen) return
@@ -178,46 +295,29 @@ export default function GameSettingsPage() {
   }, [activeTab])
 
   useEffect(() => {
-    let mounted = true
-    const syncSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (!mounted) return
-      const hasSession = Boolean(data.session)
-      const admin = data.session?.user?.app_metadata?.role === "admin"
-      setIsAuthenticated(hasSession)
-      setIsAdmin(admin)
+    if (isSessionLoading) {
+      return
+    }
+
+    const hasSession = Boolean(sessionUser)
+    const admin = sessionUser?.app_metadata?.role === "admin"
+    setIsAuthenticated(hasSession)
+    setIsAdmin(admin)
+
+    if (!hasSession) {
       setCheckingAuth(false)
-      if (!hasSession) {
-        router.replace("/auth?next=/game-settings")
-        return
-      }
-      if (!admin) {
-        router.replace("/")
-      }
+      router.replace("/auth?next=/game-settings")
+      return
     }
 
-    syncSession()
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        const hasSession = Boolean(session)
-        const admin = session?.user?.app_metadata?.role === "admin"
-        setIsAuthenticated(hasSession)
-        setIsAdmin(admin)
-        if (!hasSession) {
-          router.replace("/auth?next=/game-settings")
-          return
-        }
-        if (!admin) {
-          router.replace("/")
-        }
-      },
-    )
-
-    return () => {
-      mounted = false
-      authListener.subscription.unsubscribe()
+    if (!admin) {
+      setCheckingAuth(false)
+      router.replace("/")
+      return
     }
-  }, [router])
+
+    setCheckingAuth(false)
+  }, [router, sessionUser, isSessionLoading])
 
   useEffect(() => {
     if (!isAuthenticated || !isAdmin) return
@@ -238,7 +338,16 @@ export default function GameSettingsPage() {
   }
 
   const fetchCharactersList = async () => {
-    const data = await fetchCharacters({ ascending: false })
+    const data = await withRetry(
+      () =>
+        withTimeout(
+          fetchCharacters({ ascending: false }),
+          5500,
+          "Settings characters fetch",
+        ),
+      1,
+      "Settings characters fetch",
+    )
     setCharacters(data)
   }
 
@@ -250,20 +359,29 @@ export default function GameSettingsPage() {
       occupationsRes,
       associationsRes,
       placesRes,
-    ] = await Promise.all([
-      supabase.from("states").select("*").order("name", { ascending: true }),
-      supabase.from("classes").select("*").order("name", { ascending: true }),
-      supabase.from("races").select("*").order("name", { ascending: true }),
-      supabase
-        .from("occupations")
-        .select("*")
-        .order("name", { ascending: true }),
-      supabase
-        .from("associations")
-        .select("*")
-        .order("name", { ascending: true }),
-      supabase.from("places").select("*").order("name", { ascending: true }),
-    ])
+    ] = await withRetry(
+      () =>
+        withTimeout(
+          Promise.all([
+            supabase.from("states").select("*").order("name", { ascending: true }),
+            supabase.from("classes").select("*").order("name", { ascending: true }),
+            supabase.from("races").select("*").order("name", { ascending: true }),
+            supabase
+              .from("occupations")
+              .select("*")
+              .order("name", { ascending: true }),
+            supabase
+              .from("associations")
+              .select("*")
+              .order("name", { ascending: true }),
+            supabase.from("places").select("*").order("name", { ascending: true }),
+          ]),
+          5500,
+          "Settings lookups fetch",
+        ),
+      1,
+      "Settings lookups fetch",
+    )
 
     const responses = [
       statesRes,
@@ -315,8 +433,12 @@ export default function GameSettingsPage() {
     setIsCharacterFormOpen(false)
     setEditingCharacterId(null)
     setCharacterFormData(emptyCharacterFormData)
-    setImageSource("url")
     setOpenMenu(null)
+    setIsCropModalOpen(false)
+    setCropImageSrc(null)
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCroppedAreaPixels(null)
   }
 
   const handleCharacterSubmit = async (e: React.FormEvent) => {
@@ -345,7 +467,82 @@ export default function GameSettingsPage() {
       place_ids: character.places.map((item) => item.id),
     })
     setIsCharacterFormOpen(true)
-    setImageSource(character.image_url ? "url" : "upload")
+  }
+
+  const openCropModal = (source: string, fileName: string) => {
+    setCropImageSrc(source)
+    setCropImageName(fileName)
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCroppedAreaPixels(null)
+    setIsCropModalOpen(true)
+  }
+
+  const handleSelectImageFile = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const sourceUrl = URL.createObjectURL(file)
+    openCropModal(sourceUrl, file.name || "character.jpg")
+    event.target.value = ""
+  }
+
+  const handleRecropImage = () => {
+    if (characterFormData.image_file) {
+      const sourceUrl = URL.createObjectURL(characterFormData.image_file)
+      openCropModal(
+        sourceUrl,
+        characterFormData.image_file.name || "character.jpg",
+      )
+      return
+    }
+
+    const existingImage = characterFormData.image_url.trim() || imagePreview
+    if (!existingImage) return
+
+    openCropModal(existingImage, `${characterFormData.name || "character"}.jpg`)
+  }
+
+  const handleDeleteImage = () => {
+    const placeholderImageUrl = buildPlaceholderImageUrl(characterFormData.name)
+    setCharacterFormData((current) => ({
+      ...current,
+      image_file: null,
+      image_url: placeholderImageUrl,
+    }))
+  }
+
+  const handleConfirmCrop = async () => {
+    if (!cropImageSrc || !croppedAreaPixels) return
+
+    try {
+      const croppedFile = await getCroppedImageFile(
+        cropImageSrc,
+        croppedAreaPixels,
+        cropImageName.replace(/\.[^/.]+$/, ".jpg"),
+      )
+
+      setCharacterFormData((current) => ({
+        ...current,
+        image_file: croppedFile,
+      }))
+      setIsCropModalOpen(false)
+      URL.revokeObjectURL(cropImageSrc)
+      setCropImageSrc(null)
+    } catch (error) {
+      console.error("Error cropping character image:", error)
+      alert("Failed to crop image. Please try again.")
+    }
+  }
+
+  const handleCancelCrop = () => {
+    setIsCropModalOpen(false)
+    if (cropImageSrc) {
+      URL.revokeObjectURL(cropImageSrc)
+    }
+    setCropImageSrc(null)
   }
 
   const handleCharacterCancel = () => {
@@ -578,9 +775,14 @@ export default function GameSettingsPage() {
   const handleAddCharacter = async (character: CharacterFormData) => {
     try {
       const uploadedImageUrl = await resolveImageUrl(character)
+      const imageUrlToSave =
+        uploadedImageUrl ||
+        character.image_url.trim() ||
+        buildPlaceholderImageUrl(character.name)
+
       const { data, error } = await supabase
         .from("characters")
-        .insert([buildCharacterPayload(character, uploadedImageUrl)])
+        .insert([buildCharacterPayload(character, imageUrlToSave)])
         .select("id")
         .single()
 
@@ -761,10 +963,17 @@ export default function GameSettingsPage() {
     setVisibleCharacterColumns(requiredCharacterColumns)
   }
 
+  const canRecropCurrentImage =
+    Boolean(characterFormData.image_file) ||
+    (Boolean(characterFormData.image_url.trim()) &&
+      !isPlaceholderImageUrl(characterFormData.image_url))
+
   if (checkingAuth) {
     return (
       <div className="configs">
-        <div className="configs__loading">Checking access...</div>
+        <div className="configs__loading">
+          <Loading label="Checking access..." />
+        </div>
       </div>
     )
   }
@@ -840,7 +1049,9 @@ export default function GameSettingsPage() {
         </div>
 
         {loading ? (
-          <div className="configs__loading">Loading data...</div>
+          <div className="configs__loading">
+            <Loading label="Loading data..." />
+          </div>
         ) : (
           <div className="configs__content">
             {activeTab === "characters" && (
@@ -935,68 +1146,48 @@ export default function GameSettingsPage() {
                             )}
                           </div>
                           <div className="character-form__media-controls">
-                            <div className="character-form__toggle">
+                            <div className="character-form__file">
+                              <input
+                                id="image_file"
+                                type="file"
+                                accept="image/*"
+                                className="character-form__file-input"
+                                onChange={handleSelectImageFile}
+                              />
+                              <label
+                                htmlFor="image_file"
+                                className="character-form__file-button"
+                              >
+                                {canRecropCurrentImage
+                                  ? "Select new file"
+                                  : "Choose file"}
+                              </label>
+                              <span className="character-form__file-name">
+                                {characterFormData.image_file?.name ||
+                                  "No file selected"}
+                              </span>
+                            </div>
+                            <span className="character-form__file-hint">
+                              Image will be cropped to a 4:5 ratio before saving.
+                            </span>
+                            <div className="character-form__image-actions">
                               <button
                                 type="button"
-                                className={imageSource === "url" ? "is-active" : ""}
-                                onClick={() => {
-                                  setImageSource("url")
-                                  setCharacterFormData((current) => ({
-                                    ...current,
-                                    image_url:
-                                      current.image_url || baseImageUrl,
-                                  }))
-                                }}
+                                className="character-form__file-button"
+                                onClick={handleRecropImage}
+                                disabled={!canRecropCurrentImage}
                               >
-                                Use URL
+                                Recrop image
                               </button>
                               <button
                                 type="button"
-                                className={imageSource === "upload" ? "is-active" : ""}
-                                onClick={() => setImageSource("upload")}
+                                className="character-form__file-button character-form__file-button--danger"
+                                onClick={handleDeleteImage}
+                                disabled={!canRecropCurrentImage}
                               >
-                                Upload file
+                                Delete image
                               </button>
                             </div>
-                            {imageSource === "url" ? (
-                              <input
-                                id="image_url"
-                                type="url"
-                                value={characterFormData.image_url}
-                                onChange={(e) =>
-                                  setCharacterFormData({
-                                    ...characterFormData,
-                                    image_url: e.target.value,
-                                  })
-                                }
-                                placeholder={baseImageUrl}
-                              />
-                            ) : (
-                              <div className="character-form__file">
-                                <input
-                                  id="image_file"
-                                  type="file"
-                                  accept="image/*"
-                                  className="character-form__file-input"
-                                  onChange={(e) =>
-                                    setCharacterFormData({
-                                      ...characterFormData,
-                                      image_file: e.target.files?.[0] ?? null,
-                                    })
-                                  }
-                                />
-                                <label
-                                  htmlFor="image_file"
-                                  className="character-form__file-button"
-                                >
-                                  Choose file
-                                </label>
-                                <span className="character-form__file-name">
-                                  {characterFormData.image_file?.name ||
-                                    "No file selected"}
-                                </span>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -1142,6 +1333,51 @@ export default function GameSettingsPage() {
                       </Button>
                     </div>
                   </form>
+                )}
+
+                {isCropModalOpen && cropImageSrc && (
+                  <div className="character-form__crop-modal" role="dialog" aria-modal="true">
+                    <div className="character-form__crop-card">
+                      <h3>Crop Image</h3>
+                      <div className="character-form__crop-area">
+                        <Cropper
+                          image={cropImageSrc}
+                          crop={crop}
+                          zoom={zoom}
+                          aspect={4 / 5}
+                          onCropChange={setCrop}
+                          onZoomChange={setZoom}
+                          onCropComplete={(_, croppedPixels) =>
+                            setCroppedAreaPixels(croppedPixels)
+                          }
+                        />
+                      </div>
+                      <div className="character-form__crop-zoom">
+                        <label htmlFor="crop_zoom">Zoom</label>
+                        <input
+                          id="crop_zoom"
+                          type="range"
+                          min={1}
+                          max={3}
+                          step={0.01}
+                          value={zoom}
+                          onChange={(event) => setZoom(Number(event.target.value))}
+                        />
+                      </div>
+                      <div className="character-form__actions">
+                        <Button type="button" onClick={handleConfirmCrop}>
+                          Apply Crop
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={handleCancelCrop}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 <div className="character-table__table-shell">

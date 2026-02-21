@@ -1,15 +1,18 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { Suspense, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useAuthSession } from "@/components/AuthSessionProvider"
 import Button from "@/components/Button"
+import Loading from "@/components/Loading"
 import { supabase } from "@/lib/supabase"
 import "./page.sass"
 
 type AuthMode = "login" | "signup"
 
-export default function AuthPage() {
+function AuthPageContent() {
   const router = useRouter()
+  const { user: sessionUser, isLoading: isSessionLoading } = useAuthSession()
   const searchParams = useSearchParams()
   const nextPath = useMemo(
     () => searchParams.get("next") || "/game-settings",
@@ -24,15 +27,14 @@ export default function AuthPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (data.session) {
-        router.replace(nextPath)
-      }
+    if (isSessionLoading) {
+      return
     }
 
-    checkSession()
-  }, [router, nextPath])
+    if (sessionUser) {
+      router.replace(nextPath)
+    }
+  }, [router, nextPath, sessionUser, isSessionLoading])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -49,6 +51,9 @@ export default function AuthPage() {
         const { error: signupError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: 'https://lx-xz.github.io/realingdle/',
+          },
         })
 
         if (signupError) throw signupError
@@ -168,5 +173,21 @@ export default function AuthPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="auth">
+          <div className="auth__card">
+            <Loading label="Loading..." />
+          </div>
+        </div>
+      }
+    >
+      <AuthPageContent />
+    </Suspense>
   )
 }

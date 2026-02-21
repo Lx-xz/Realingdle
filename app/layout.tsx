@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { AuthSessionProvider } from "@/components/AuthSessionProvider"
 import HeaderMenu from "@/components/HeaderMenu"
 import ScrollPage from "@/components/ScrollPage"
 import "./globals.sass"
@@ -29,17 +30,19 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <ScrollPage>
-          <div className="site">
-            <header className="site__header">
-              <Link href="/" className="site__logo">
-                REALINGDLE
-              </Link>
-              <HeaderMenu />
-            </header>
-            <main className="site__main">{children}</main>
-          </div>
-        </ScrollPage>
+        <AuthSessionProvider>
+          <ScrollPage>
+            <div className="site">
+              <header className="site__header">
+                <Link href="/" className="site__logo">
+                  REALINGDLE
+                </Link>
+                <HeaderMenu />
+              </header>
+              <main className="site__main">{children}</main>
+            </div>
+          </ScrollPage>
+        </AuthSessionProvider>
       </body>
     </html>
   )

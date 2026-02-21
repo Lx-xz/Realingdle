@@ -4,23 +4,43 @@
   align-items: center
   gap: 1rem
 
+  &__blank
+    width: 220px
+    height: 60px
+
   &__display-rank
-    background-color: #e0f7fa
-    color: #006064
+    background-color: #defbff
+    color: #009ba0
     padding: 0.5rem 0.5rem
     border-radius: 0.5rem
     font-size: 0.8rem
     display: flex
+    align-items: center
     gap: 0.25rem
+    text-decoration: none
+    transition: filter 0.2s ease
+
+    &:hover
+      filter: brightness(0.95)
 
   &__display-wins
-    background-color: #fff1b5
-    color: #b39200
+    background-color: #fff3c5
+    color: #b69400
     padding: 0.5rem 0.5rem
     border-radius: 0.5rem
     font-size: 0.8rem
     display: flex
+    align-items: center
     gap: 0.25rem
+
+  &__stale
+    background-color: #f1f3f5
+    color: #6b7280
+    padding: 0.2rem 0.45rem
+    border-radius: 999px
+    font-size: 0.68rem
+    text-transform: uppercase
+    letter-spacing: 0.06em
 
   &__trigger
     width: 60px
@@ -60,7 +80,7 @@
 
   &__dropdown
     position: absolute
-    top: calc(100% + 10px)
+    top: calc(100% + 0.25rem)
     right: 0
     min-width: 180px
     background: #ffffff
@@ -102,8 +122,8 @@
       background: rgba(183, 28, 28, 0.12)
 
   &__icon
-    width: 18px
-    height: 18px
+    width: 1.2rem
+    height: 1.2rem
 
   @keyframes menu-pop
     from

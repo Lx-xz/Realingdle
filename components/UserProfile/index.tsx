@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useAuthSession } from "@/components/AuthSessionProvider"
 import { supabase } from "@/lib/supabase"
 import Button from "@/components/Button"
+import Loading from "@/components/Loading"
 import "./UserProfile.sass"
 
 interface UserProfileProps {
@@ -10,9 +12,9 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ onLogout }: UserProfileProps) {
+  const { user: sessionUser } = useAuthSession()
   const [isEditing, setIsEditing] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [session, setSession] = useState<any>(null)
   const [formData, setFormData] = useState({
     email: "",
     newPassword: "",
@@ -26,8 +28,8 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    loadUserData()
-  }, [])
+    loadUserData(sessionUser)
+  }, [sessionUser])
 
   useEffect(() => {
     if (!avatarFile) {
@@ -43,20 +45,20 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
     }
   }, [avatarFile])
 
-  const loadUserData = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (session) {
-      setUser(session.user)
-      setSession(session)
-      setAvatarUrl(session.user.user_metadata?.avatar_url || "")
+  const loadUserData = async (nextUser: any) => {
+    if (nextUser) {
+      setUser(nextUser)
+      setAvatarUrl(nextUser.user_metadata?.avatar_url || "")
       setFormData({
-        email: session.user.email || "",
+        email: nextUser.email || "",
         newPassword: "",
         confirmPassword: "",
       })
+      return
     }
+
+    setUser(null)
+    setAvatarUrl("")
   }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -90,7 +92,7 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
         newPassword: "",
         confirmPassword: "",
       })
-      await loadUserData()
+      await loadUserData(sessionUser)
     } catch (err: any) {
       setError(err.message || "Failed to update profile")
     }
@@ -103,8 +105,6 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
     setError("")
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      console.log('avatar upload session', sessionData.session?.user?.id)
       const safeName = avatarFile.name.replace(/[^a-zA-Z0-9.-]/g, "-")
       const filePath = `${user.id}/${Date.now()}-${safeName}`
       const { error: uploadError } = await supabase.storage
@@ -128,7 +128,7 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
       setAvatarUrl(publicUrl)
       setAvatarFile(null)
       setMessage("Avatar updated successfully!")
-      await loadUserData()
+      await loadUserData(sessionUser)
     } catch (err: any) {
       setError(err.message || "Failed to update avatar")
     } finally {
@@ -153,7 +153,11 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
   }, [user])
 
   if (!user) {
-    return <div className="user-profile">Loading...</div>
+    return (
+      <div className="user-profile">
+        <Loading label="Loading..." />
+      </div>
+    )
   }
 
   return (
@@ -279,16 +283,16 @@ export default function UserProfile({ onLogout }: UserProfileProps) {
             <div className="user-profile__row">
               <span className="user-profile__label">Created:</span>
               <span className="user-profile__value">
-                {session?.user?.created_at
-                  ? new Date(session.user.created_at).toLocaleString()
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleString()
                   : "-"}
               </span>
             </div>
             <div className="user-profile__row">
               <span className="user-profile__label">Last Sign In:</span>
               <span className="user-profile__value">
-                {session?.user?.last_sign_in_at
-                  ? new Date(session.user.last_sign_in_at).toLocaleString()
+                {user?.last_sign_in_at
+                  ? new Date(user.last_sign_in_at).toLocaleString()
                   : "-"}
               </span>
             </div>

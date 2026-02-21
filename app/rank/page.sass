@@ -1,0 +1,41 @@
+.rank-page
+  display: flex
+  justify-content: center
+  padding: 24px 12px
+
+  &__card
+    width: 100%
+    max-width: 780px
+    background: #ffffff
+    border-radius: 20px
+    border: 1px solid var(--border)
+    box-shadow: 0 18px 40px var(--shadow)
+    padding: 24px
+
+  &__title
+    margin: 0 0 16px
+
+  &__status
+    color: #5a5a5a
+
+  &__error
+    color: var(--danger)
+
+  &__table-wrapper
+    overflow-x: auto
+
+  &__table
+    width: 100%
+    border-collapse: collapse
+
+    th,
+    td
+      text-align: left
+      padding: 10px 12px
+      border-bottom: 1px solid var(--border)
+
+    th
+      font-size: 12px
+      letter-spacing: 0.08em
+      text-transform: uppercase
+      color: #666666
