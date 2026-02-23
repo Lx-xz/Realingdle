@@ -1,9 +1,9 @@
-:HL["/realingdle/_next/static/chunks/85631ce8809fe133.css","style"]
+:HL["/realingdle/_next/static/chunks/d674c53bb01b81bb.css","style"]
 :HL["/realingdle/_next/static/chunks/5226d26e537045aa.css","style"]
-:HL["/realingdle/_next/static/chunks/74c1ebedb3061baa.css","style"]
+:HL["/realingdle/_next/static/chunks/08e0792f7de99f74.css","style"]
 :HL["/realingdle/_next/static/chunks/db55afcd5e33735d.css","style"]
 :HL["/realingdle/_next/static/chunks/e9883df29745ad7f.css","style"]
 :HL["/realingdle/_next/static/chunks/8a4ea878fe7bc7c7.css","style"]
-:HL["/realingdle/_next/static/chunks/be081182e23019e5.css","style"]
+:HL["/realingdle/_next/static/chunks/28c4525d39c018e6.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap","style"]
-0:{"buildId":"SdamZE_sMpm7yc9zS8czn","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"game","paramType":null,"paramKey":"game","hasRuntimePrefetch":false,"slots":{"children":{"name":"date","paramType":"d","paramKey":"2027-05-01","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"XuTnEKrn57apicgWHcrZX","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"game","paramType":null,"paramKey":"game","hasRuntimePrefetch":false,"slots":{"children":{"name":"date","paramType":"d","paramKey":"2027-05-01","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
