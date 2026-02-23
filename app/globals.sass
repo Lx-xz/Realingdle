@@ -1,5 +1,5 @@
 :root
-  --background: #f5f5f5
+  --background: #f5f4f4
   --foreground: #0f0f0f
   --primary: #111111
   --primary-hover: #000000
@@ -26,11 +26,11 @@ body
 
 .site
   height: 100vh
+  max-width: 100vw
   display: flex
   flex-direction: column
 
-  &__header,
-  &__footer
+  &__header
     min-height: 5rem
     padding: 0 5rem
     background: #ffffff
@@ -40,11 +40,6 @@ body
     display: flex
     align-items: center
     justify-content: space-between
-
-  &__footer
-    border-top: 1px solid var(--border)
-    border-bottom: none
-    margin-top: auto
 
   &__logo
     font-weight: 700
@@ -76,3 +71,12 @@ ul
 
 input
   font-family: inherit
+
+@media screen and (max-width: 600px)
+  .site
+    &__header,
+    &__footer
+      padding: 0 1.5rem
+
+    &__main
+      padding: 1rem 1.5rem

@@ -709,7 +709,6 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
     <div className="game">
       <div className="game__container">
         <div className="game__header">
-          <h1 className="game__title">Guess the Character</h1>
           <div className="game__date-dropdown-wrap">
             <button
               type="button"

@@ -125,10 +125,83 @@
     width: 1.2rem
     height: 1.2rem
 
-  @keyframes menu-pop
-    from
-      opacity: 0
-      transform: translateY(-6px) scale(0.98)
-    to
-      opacity: 1
-      transform: translateY(0) scale(1)
+  &__bottomsheet-content
+    position: relative
+    left: 0
+    right: 0
+    top: 100%
+    transform: translateY(0)
+    transition: transform 0.22s cubic-bezier(.4,1.01,.77,1)
+
+  &__bottomsheet-close
+    width: 100%
+    height: 48px
+    background: transparent
+    border: none
+    border-radius: 18px 18px 0 0
+    display: flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    z-index: 101
+    margin-bottom: 0.5rem
+    svg
+      display: block
+      margin: 0 auto
+
+  &__bottomsheet--closing &__bottomsheet-content
+    transform: translateY(100%)
+    transition: transform 0.22s cubic-bezier(.4,1.01,.77,1)
+
+  &__desktop
+    display: flex
+    align-items: center
+    gap: 1rem
+    @media (max-width: 600px)
+      display: none
+
+  &__mobile
+    display: none
+    @media (max-width: 600px)
+      display: flex
+      align-items: center
+      gap: 0.5rem
+
+  &__bottomsheet
+    position: fixed
+    left: 0
+    right: 0
+    bottom: 0
+    z-index: 100
+    background: rgba(0,0,0,0.18)
+    min-height: 100vh
+    display: flex
+    align-items: flex-end
+    justify-content: center
+
+  &__bottomsheet-content
+    width: 100%
+    max-width: 420px
+    background: #fff
+    border-radius: 18px 18px 0 0
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.12)
+    display: flex
+    flex-direction: column
+    gap: 0.7rem
+    animation: bottomsheet-slide 0.22s ease
+
+@keyframes menu-pop
+  from
+    opacity: 0
+    transform: translateY(-6px) scale(0.98)
+  to
+    opacity: 1
+    transform: translateY(0) scale(1)
+
+@keyframes bottomsheet-slide
+  from
+    opacity: 0
+    transform: translateY(60px)
+  to
+    opacity: 1
+    transform: translateY(0)

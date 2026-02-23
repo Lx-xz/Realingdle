@@ -1,5 +1,12 @@
 "use client"
 
+declare global {
+  interface Window {
+    __headerMenuDragY?: number;
+    __headerMenuDragStart?: number;
+  }
+}
+
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -84,6 +91,7 @@ export default function HeaderMenu() {
   const [gamesPlayed, setGamesPlayed] = useState<number>(0)
   const [isStale, setIsStale] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
   const sessionUserIdRef = useRef<string | null>(null)
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -246,17 +254,22 @@ export default function HeaderMenu() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!menuRef.current) return
-      if (!menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+      if (!isOpen) return;
+      // For mobile bottomsheet
+      const bottomsheet = document.querySelector('.header-menu__bottomsheet');
+      if (bottomsheet && event.target instanceof Node && !bottomsheet.contains(event.target)) {
+        setIsOpen(false);
       }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
+      // For desktop dropdown
+      if (menuRef.current && event.target instanceof Node && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -302,45 +315,70 @@ export default function HeaderMenu() {
   return (
     <div className="header-menu" ref={menuRef}>
       {sessionUser ? (
-      <>
-        <Link className="header-menu__display-rank" href="/rank" title="Seu rank">
-          <Medal className="header-menu__icon" />
-          {sessionUser ? (gamesPlayed > 0 && rank ? `#${rank}` : "No rank") : "Login to see"}
-        </Link>
-        <div className="header-menu__display-wins" title="Vitórias">
-          <Award className="header-menu__icon" />
-          {wins}
-        </div>
-        {isStale && <span className="header-menu__stale">cache</span>}
-        <span className="header-menu__display-name">
-          {displayName}
-        </span>
-        <button
-          type="button"
-          className="header-menu__trigger"
-          onClick={() => setIsOpen((prev) => !prev)}
-          aria-expanded={isOpen}
-        >
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="User avatar"
-              className="header-menu__avatar"
-            />
-          ) : (
-            <span className="header-menu__avatar header-menu__avatar--placeholder">
-              {avatarLabel}
+        <>
+          {/* Desktop: full menu */}
+          <div className="header-menu__desktop">
+            <Link className="header-menu__display-rank" href="/rank" title="Seu rank">
+              <Medal className="header-menu__icon" />
+              {sessionUser ? (gamesPlayed > 0 && rank ? `#${rank}` : "No rank") : "Login to see"}
+            </Link>
+            <div className="header-menu__display-wins" title="Vitórias">
+              <Award className="header-menu__icon" />
+              {wins}
+            </div>
+            {isStale && <span className="header-menu__stale">cache</span>}
+            <span className="header-menu__display-name">
+              {displayName}
             </span>
-          )}
-        </button>
-      </>
+            <button
+              type="button"
+              className="header-menu__trigger"
+              onClick={() => setIsOpen((prev) => !prev)}
+              aria-expanded={isOpen}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User avatar"
+                  className="header-menu__avatar"
+                />
+              ) : (
+                <span className="header-menu__avatar header-menu__avatar--placeholder">
+                  {avatarLabel}
+                </span>
+              )}
+            </button>
+          </div>
+          {/* Mobile: only avatar */}
+          <div className="header-menu__mobile">
+            <button
+              type="button"
+              className="header-menu__trigger"
+              onClick={() => setIsOpen(true)}
+              aria-expanded={isOpen}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User avatar"
+                  className="header-menu__avatar"
+                />
+              ) : (
+                <span className="header-menu__avatar header-menu__avatar--placeholder">
+                  {avatarLabel}
+                </span>
+              )}
+            </button>
+          </div>
+        </>
       ) : (
         <Link className="header-menu__login" href="/auth?next=/profile">
           Login
         </Link>
       )}
 
-      {sessionUser && isOpen && (
+      {/* Desktop dropdown */}
+      {sessionUser && isOpen && typeof window !== "undefined" && window.innerWidth > 600 && (
         <div className="header-menu__dropdown">
           <Link className="header-menu__link" href="/rank">
             <Medal className="header-menu__icon" />
@@ -364,6 +402,92 @@ export default function HeaderMenu() {
             <LogOut className="header-menu__icon" />
             Logout
           </button>
+        </div>
+      )}
+
+      {/* Mobile bottom sheet menu */}
+      {sessionUser && (isOpen || isClosing) && typeof window !== "undefined" && window.innerWidth <= 600 && (
+        <div
+          className={`header-menu__bottomsheet${isClosing ? ' header-menu__bottomsheet--closing' : ''}`}
+          onClick={e => {
+            if (e.target === e.currentTarget) {
+              setIsClosing(true);
+              setTimeout(() => {
+                setIsOpen(false);
+                setIsClosing(false);
+              }, 220);
+            }
+          }}
+        >
+          <div
+            className="header-menu__bottomsheet-content"
+            style={{ touchAction: 'none' }}
+            onTouchStart={e => {
+              e.stopPropagation();
+              window.__headerMenuDragY = e.touches[0].clientY;
+              window.__headerMenuDragStart = e.touches[0].clientY;
+            }}
+            onTouchMove={e => {
+              e.stopPropagation();
+              const dragY = e.touches[0].clientY;
+              const diff = dragY - (window.__headerMenuDragStart || dragY);
+              if (diff > 0) {
+                e.currentTarget.style.transform = `translateY(${diff}px)`;
+              }
+            }}
+            onTouchEnd={e => {
+              e.stopPropagation();
+              const dragY = e.changedTouches[0].clientY;
+              const diff = dragY - (window.__headerMenuDragStart || dragY);
+              e.currentTarget.style.transform = '';
+              if (diff > 60) {
+                setIsClosing(true);
+                setTimeout(() => {
+                  setIsOpen(false);
+                  setIsClosing(false);
+                }, 220);
+              }
+              window.__headerMenuDragY = undefined;
+              window.__headerMenuDragStart = undefined;
+            }}
+          >
+            <button
+              className="header-menu__bottomsheet-close"
+              type="button"
+              onClick={() => {
+                setIsClosing(true);
+                setTimeout(() => {
+                  setIsOpen(false);
+                  setIsClosing(false);
+                }, 220);
+              }}
+              aria-label="Fechar menu"
+            >
+              <svg width="36" height="36" viewBox="0 0 36 36"><polyline points="10,16 18,24 26,16" fill="none" stroke="#222" strokeWidth="2"/></svg>
+            </button>
+            <Link className="header-menu__link" href="/rank" onClick={() => setIsOpen(false)}>
+              <Medal className="header-menu__icon" />
+              Rank
+            </Link>
+            <Link className="header-menu__link" href="/profile" onClick={() => setIsOpen(false)}>
+              <User className="header-menu__icon" />
+              Profile
+            </Link>
+            {isAdmin && (
+              <Link className="header-menu__link" href="/game-settings" onClick={() => setIsOpen(false)}>
+                <Settings className="header-menu__icon" />
+                Game settings
+              </Link>
+            )}
+            <button
+              type="button"
+              className="header-menu__link header-menu__link--button header-menu__link--danger"
+              onClick={() => { setIsOpen(false); handleLogout(); }}
+            >
+              <LogOut className="header-menu__icon" />
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </div>

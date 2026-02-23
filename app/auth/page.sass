@@ -1,7 +1,6 @@
 .auth
   display: flex
   justify-content: center
-  padding: 24px 12px
 
   &__card
     width: 100%
@@ -12,21 +11,6 @@
     border: 1px solid var(--border)
     box-shadow: 0 18px 40px var(--shadow)
     animation: auth-in 0.32s ease
-
-  &__header
-    text-align: center
-    margin-bottom: 24px
-
-  &__title
-    font-size: 26px
-    font-weight: 700
-    letter-spacing: 0.08em
-    text-transform: uppercase
-    margin-bottom: 8px
-
-  &__subtitle
-    font-size: 14px
-    color: #4a4a4a
 
   &__tabs
     display: grid
@@ -49,11 +33,14 @@
     transition: all 0.2s ease
 
     &:hover
-      color: #111111
+      color: #111
 
     &--active
       background: var(--primary)
-      color: #ffffff
+      color: #fff
+
+      &:hover
+        color: #fff
 
   &__form
     display: flex
@@ -99,6 +86,21 @@
     gap: 12px
     margin-top: 4px
     justify-content: center
+
+    & button
+      flex: 1
+      justify-content: center
+
+@media screen and (max-width: 600px)
+  .auth
+    &__card
+      padding: 20px
+
+    &__tabs
+      gap: 4px
+
+    &__actions
+      flex-direction: column
 
 @keyframes auth-in
   from

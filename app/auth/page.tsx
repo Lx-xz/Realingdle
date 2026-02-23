@@ -84,15 +84,6 @@ function AuthPageContent() {
   return (
     <div className="auth">
       <div className="auth__card">
-        <div className="auth__header">
-          <h1 className="auth__title">Admin Access</h1>
-          <p className="auth__subtitle">
-            {mode === "login"
-              ? "Login to manage characters and game data."
-              : "Create an admin account to manage content."}
-          </p>
-        </div>
-
         <div className="auth__tabs">
           <button
             type="button"

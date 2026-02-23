@@ -1,7 +1,6 @@
 .profile
   display: flex
   justify-content: center
-  padding: 24px 12px
 
   &__card
     width: 100%
@@ -174,7 +173,6 @@
   &__actions
     display: flex
     gap: 12px
-    margin-top: 8px
 
   &__save,
   &__cancel
@@ -182,6 +180,7 @@
     border-radius: 10px
     font-weight: 600
     font-size: 14px
+    flex: 1
 
   &__save
     background: var(--primary)
@@ -200,3 +199,8 @@
     color: var(--danger)
     font-size: 14px
     font-weight: 500
+
+@media screen and (max-width: 600px)
+  .profile
+    &__card
+      padding: 20px
