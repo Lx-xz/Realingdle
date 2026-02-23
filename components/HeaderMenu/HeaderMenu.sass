@@ -181,14 +181,16 @@
 
   &__bottomsheet-content
     width: 100%
-    max-width: 420px
     background: #fff
     border-radius: 18px 18px 0 0
     box-shadow: 0 -8px 32px rgba(0,0,0,0.12)
     display: flex
     flex-direction: column
-    gap: 0.7rem
     animation: bottomsheet-slide 0.22s ease
+
+    a, button
+      padding: 1.5rem
+      border-radius: 0
 
 @keyframes menu-pop
   from

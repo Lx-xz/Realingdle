@@ -1,16 +1,14 @@
 .game
-  display: flex  
-  justify-content: center
+  display: flex
+  flex-flow: column
+  align-items: center
 
   &__container
-    width: 980px
-
-  &__header
+    width: 100%
+    max-width: 900px
     display: flex
-    align-items: center
-    justify-content: space-between
-    gap: 12px
-    margin-bottom: 18px
+    flex-flow: column
+    gap: 1rem
 
   &__title
     font-size: 32px
@@ -50,9 +48,8 @@
 
   &__date-dropdown
     position: absolute
-    left: 0
     top: calc(100% + 8px)
-    width: min(520px, 88vw)
+    width: min(520px, 100%)
     border: 1px solid var(--border)
     border-radius: 14px
     background: #fafafa
@@ -86,8 +83,8 @@
       border-color: #111
 
     &--won
-      background: #00b377
-      color: #ffffff
+      background: #f8fff6
+      color: #111
 
     &--lost
       background: #b42323
@@ -98,18 +95,13 @@
       color: #1a1a1a
 
   &__search
-    margin-top: 28px
-    margin-bottom: 32px
     display: flex
     justify-content: center
     width: 100%
 
   &__result
-    margin: 28px 0
-    padding: 24px
-    border-radius: 16px
+    padding: 24px 0
     text-align: center
-    border: 1px solid var(--border)
     animation: result-pop 0.25s ease
 
     h2
@@ -118,16 +110,7 @@
 
     p
       font-size: 16px
-      margin-bottom: 20px
       color: #4a4a4a
-
-    &--win
-      background-color: #f1f8f1
-      border-color: rgba(27, 94, 32, 0.4)
-
-    &--lose
-      background-color: #fbf1f1
-      border-color: rgba(183, 28, 28, 0.4)
 
   &__actions
     display: flex
@@ -135,8 +118,6 @@
     justify-content: center
 
   &__guesses
-    margin-top: 32px
-
     h3
       font-size: 20px
       font-weight: 600
@@ -148,50 +129,56 @@
     gap: 16px
 
   &__guess-card
-    padding: 0
+    height: max-content
     border-radius: 18px
-    border: 1px solid #d9d9d9
+    border: 2px solid #d9d9d9
     background: #ffffff
     color: #1a1a1a
-    overflow: hidden
-    position: relative
-    min-height: 240px
     animation: guess-reveal 0.3s ease
+    overflow: hidden
+
+    &--correct
+      border-color: #6bac5a
+      background-color: #f8fff6
+
+      .guess-card__image::after
+        background-image: linear-gradient(to right, #f8fff6, #f8fff63b, transparent)
+
+    &--unknown
+      background: #f7f7f7
+
+.guess-card
+  &__content
+    display: flex
+    position: relative
+
+  &__image
+    position: absolute
+    top: 0
+    right: 0
+    width: 33%
+    height: 100%
+    flex: 1
+    background: var(--guess-image)
+    background-size: cover
+    background-position: center
+    z-index: 0
 
     &::after
       content: ""
       position: absolute
       top: 0
-      right: 0
-      width: 44%
+      left: 0
+      width: 100%
       height: 100%
-      background-image: var(--guess-image)
-      background-position: center
-      background-repeat: no-repeat
-      background-size: cover
-      z-index: 0
-
-    &--correct
-      border-color: rgba(46, 125, 50, 0.55)
-
-    &--unknown
-      background: #f7f7f7
-
-      &::after
-        display: none
-
-.guess-card
-  &__content
-    display: block
-    padding: 24px
-    width: 56%
-    position: relative
-    z-index: 1
+      background-image: linear-gradient(to right, #fff, #ffffff3b, transparent 80%)
 
   &__info
+    padding: 1.5rem
     display: flex
     flex-direction: column
     gap: 12px
+    z-index: 1
 
   &__title
     h4
@@ -236,50 +223,61 @@
   display: inline-flex
   align-items: center
   padding: 6px 12px
-  border-radius: 999px
-  font-size: 12px
+  border-radius: 9px
+  font-size: 0.8rem
   font-weight: 600
-  border: 1px solid transparent
+  color: #fff
+  text-shadow: 0 0 1rem #333
 
   &--match
-    background: rgba(27, 94, 32, 0.12)
-    border-color: rgba(27, 94, 32, 0.4)
-    color: #1b5e20
+    background: #3ea325
 
   &--miss
-    background: rgba(183, 28, 28, 0.12)
-    border-color: rgba(183, 28, 28, 0.4)
-    color: #b71c1c
+    background: #e41414
 
 @media screen and (max-width: 600px)
   .game
     &__container
       max-width: 100%
 
-    &__guess-card
-      display: flex
-      flex-direction: column
-      padding-top: 9rem
+  .guess-card    
+    &__content
+      padding: 10px
+      flex-flow: column-reverse
+      align-items: center
+      gap: 12px
+
+    &__image
+      position: relative
+      width: 33%
+      aspect-ratio: 4/5
+      background: var(--guess-image)
+      background-size: cover
+      background-position: center
+      border: 2px solid #d9d9d9
+      border-radius: 12px
 
       &::after
-        height: 140px
-        top: 1rem
-        left: 0
-        right: 0
-        border-radius: 16px
-        margin: 0 auto
-        border: 1px solid #d9d9d9
+        background-image: none
 
-      &__content
-        width: 100%
-        padding: 0
-        margin-top: 150px
-        text-align: center
+    &__info
+      width: 100%
+      padding: 0
+      text-align: center
 
-      &__title 
-        h4
-          text-align: center
+    &__row
+      flex: 1
 
+      .guess-chip
+        flex: 1
+        justify-content: center
+
+  .game__guess-card--correct .guess-card__image
+    border-color: #6bac5a
+
+    &::after
+      background-image: none
+    
 @keyframes guess-reveal
   from
     opacity: 0

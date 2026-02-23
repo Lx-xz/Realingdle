@@ -832,7 +832,6 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                       ? "game__guess-card--correct"
                       : "game__guess-card--wrong"
                   }`}
-                  style={backgroundStyle}
                 >
                   <div className="guess-card__content">
                     <div className="guess-card__info">
@@ -926,6 +925,7 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                         </div>
                       </div>
                     </div>
+                    <div className="guess-card__image" style={backgroundStyle}></div>
                   </div>
                 </li>
               )
