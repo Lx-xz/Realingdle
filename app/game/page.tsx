@@ -828,11 +828,10 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                   (guessedCharacter.age ?? null) ===
                   (characterOfDay.age ?? null),
                 ageComparison: (() => {
-                  if (characterOfDay.age == null || characterOfDay.age === "") return "no-age";
-                  if (guessedCharacter.age == null || guessedCharacter.age === "") return "no-age";
+                  if (characterOfDay.age == null) return "no-age";
                   if (guessedCharacter.age === characterOfDay.age) return "equal";
-                  if (guessedCharacter.age > characterOfDay.age) return "down";
-                  if (guessedCharacter.age < characterOfDay.age) return "up";
+                  if (guessedCharacter.age != null && guessedCharacter.age > characterOfDay.age) return "down";
+                  if (guessedCharacter.age != null && guessedCharacter.age < characterOfDay.age) return "up";
                   return "no-age";
                 })(),
               }
@@ -868,23 +867,28 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                           <div className="guess-card__chips">
                             <span
                               className={`guess-chip ${
-                                comparisons.ageComparison === "no-age"
+                                characterOfDay.age == null
                                   ? "guess-chip--no-age"
                                   : comparisons.age
                                     ? "guess-chip--match"
                                     : "guess-chip--miss"
                               }`}
                             >
-                              {comparisons.ageComparison === "no-age"
+                              {characterOfDay.age == null
                                 ? "?"
                                 : <>
-                                    {guessedCharacter.age}
-                                    {comparisons.ageComparison === "up" && (
-                                      <ArrowUp style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
-                                    )}
-                                    {comparisons.ageComparison === "down" && (
-                                      <ArrowDown style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
-                                    )}
+                                    {guessedCharacter.age == null
+                                      ? "?"
+                                      : <>
+                                          {guessedCharacter.age}
+                                          {comparisons.ageComparison === "up" && (
+                                            <ArrowUp style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
+                                          )}
+                                          {comparisons.ageComparison === "down" && (
+                                            <ArrowDown style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
+                                          )}
+                                        </>
+                                    }
                                   </>
                               }
                             </span>
