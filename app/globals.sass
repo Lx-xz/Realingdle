@@ -51,12 +51,6 @@ body
     padding: 1rem 5rem
     flex: 1
 
-  &__footer-link
-    font-weight: 600
-    font-size: 14px
-    text-transform: uppercase
-    letter-spacing: 0.08em
-
 a
   color: inherit
   text-decoration: none
@@ -80,3 +74,9 @@ input
 
     &__main
       padding: 1rem 1.5rem
+
+@supports (height: 100dvh)
+  html,
+  body,
+  .site
+    height: 100dvh

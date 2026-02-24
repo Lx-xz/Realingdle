@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { CalendarDays, ChevronDown } from "lucide-react"
+import { CalendarDays, ChevronDown, Check, X, Pause, ArrowUp, ArrowDown } from "lucide-react"
 import { useAuthSession } from "@/components/AuthSessionProvider"
 import SearchBar from "@/components/SearchBar"
 import LifeBar from "@/components/LifeBar"
@@ -743,6 +743,11 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                     const selectedClass =
                       availableDate === gameDate ? "game__date-chip--selected" : ""
 
+                    let StatusIcon = null
+                    if (dateStatus === "won") StatusIcon = Check
+                    else if (dateStatus === "lost") StatusIcon = X
+                    else if (dateStatus === "in-progress") StatusIcon = Pause
+
                     return (
                       <button
                         key={availableDate}
@@ -750,6 +755,12 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                         className={`game__date-chip ${statusClass} ${selectedClass}`}
                         onClick={() => handleSelectDate(availableDate)}
                       >
+                        {StatusIcon && (
+                          <StatusIcon
+                            size={16}
+                            style={{ marginRight: 4, verticalAlign: "middle" }}
+                          />
+                        )}
                         {formatDateShort(availableDate)}
                       </button>
                     )
@@ -816,6 +827,14 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                 age:
                   (guessedCharacter.age ?? null) ===
                   (characterOfDay.age ?? null),
+                ageComparison: (() => {
+                  if (characterOfDay.age == null || characterOfDay.age === "") return "no-age";
+                  if (guessedCharacter.age == null || guessedCharacter.age === "") return "no-age";
+                  if (guessedCharacter.age === characterOfDay.age) return "equal";
+                  if (guessedCharacter.age > characterOfDay.age) return "down";
+                  if (guessedCharacter.age < characterOfDay.age) return "up";
+                  return "no-age";
+                })(),
               }
 
               const backgroundStyle = guessedCharacter.image_url
@@ -849,12 +868,25 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                           <div className="guess-card__chips">
                             <span
                               className={`guess-chip ${
-                                comparisons.age
-                                  ? "guess-chip--match"
-                                  : "guess-chip--miss"
+                                comparisons.ageComparison === "no-age"
+                                  ? "guess-chip--no-age"
+                                  : comparisons.age
+                                    ? "guess-chip--match"
+                                    : "guess-chip--miss"
                               }`}
                             >
-                              {guessedCharacter.age ?? "-"}
+                              {comparisons.ageComparison === "no-age"
+                                ? "?"
+                                : <>
+                                    {guessedCharacter.age}
+                                    {comparisons.ageComparison === "up" && (
+                                      <ArrowUp style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
+                                    )}
+                                    {comparisons.ageComparison === "down" && (
+                                      <ArrowDown style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
+                                    )}
+                                  </>
+                              }
                             </span>
                           </div>
                         </div>

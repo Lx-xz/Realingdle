@@ -354,177 +354,165 @@ export default function ProfilePage() {
 
   return (
     <div className="profile">
-      <div className="profile__card">
-        <div className="profile__header">
-          <div className="profile__avatar">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="User avatar" />
-            ) : (
-              <span>{avatarInitial}</span>
-            )}
-          </div>
-          <div>
-            <h1 className="profile__title">Profile</h1>
-            <p className="profile__subtitle">Account details</p>
-          </div>
-          <button
-            type="button"
-            className="profile__edit"
-            onClick={() => setIsEditing(true)}
-            aria-label="Edit profile"
-          >
-            <Pencil size={18} />
-          </button>
+      <div className="profile__header">
+        <div className="profile__avatar">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="User avatar" />
+          ) : (
+            <span>{avatarInitial}</span>
+          )}
         </div>
+        <div className="profile__row">
+          <span className="profile__name">
+            {profile?.display_name}
+          </span>
+          <span className="profile__email">{user.email}</span>
+        </div>
+        <button
+          type="button"
+          className="profile__edit"
+          onClick={() => setIsEditing(true)}
+          aria-label="Edit profile"
+        >
+          <Pencil size={18} />
+        </button>
+      </div>
 
-        {!isEditing ? (
-          <div className="profile__info">
-            <div className="profile__row">
-              <span className="profile__label">Display name</span>
-              <span className="profile__value">
-                {profile?.display_name || "-"}
-              </span>
-            </div>
-            <div className="profile__row">
-              <span className="profile__label">Email</span>
-              <span className="profile__value">{user.email}</span>
-            </div>
-            <div className="profile__row">
+      {!isEditing ? (
+        <div className="profile__info">
+          <div className="profile__row">
+            <div className="profile__games">
               <span className="profile__label">Games played</span>
               <span className="profile__value">
                 {profile?.games_played ?? 0}
               </span>
             </div>
-            <div className="profile__row">
+            <div className="profile__wins">
               <span className="profile__label">Wins</span>
               <span className="profile__value">{profile?.wins ?? 0}</span>
             </div>
-            <div className="profile__row">
-              <span className="profile__label">User ID</span>
-              <span className="profile__value">{user.id}</span>
+          </div>
+        </div>
+      ) : (
+        <form className="profile__form" onSubmit={handleSave}>
+          <div className="profile__field">
+            <label htmlFor="displayName">Display name</label>
+            <input
+              id="displayName"
+              type="text"
+              value={formData.displayName}
+              onChange={(event) =>
+                setFormData({ ...formData, displayName: event.target.value })
+              }
+              required
+            />
+          </div>
+          <div className="profile__field">
+            <label>Avatar source</label>
+            <div className="profile__switch">
+              <button
+                type="button"
+                className={avatarMode === "url" ? "is-active" : ""}
+                onClick={() => setAvatarMode("url")}
+              >
+                URL
+              </button>
+              <button
+                type="button"
+                className={avatarMode === "upload" ? "is-active" : ""}
+                onClick={() => setAvatarMode("upload")}
+              >
+                Upload
+              </button>
             </div>
           </div>
-        ) : (
-          <form className="profile__form" onSubmit={handleSave}>
+          {avatarMode === "url" ? (
             <div className="profile__field">
-              <label htmlFor="displayName">Display name</label>
+              <label htmlFor="avatarUrl">Avatar URL</label>
               <input
-                id="displayName"
-                type="text"
-                value={formData.displayName}
+                id="avatarUrl"
+                type="url"
+                value={formData.avatarUrl}
                 onChange={(event) =>
-                  setFormData({ ...formData, displayName: event.target.value })
+                  setFormData({ ...formData, avatarUrl: event.target.value })
                 }
-                required
+                placeholder="https://"
               />
             </div>
+          ) : (
             <div className="profile__field">
-              <label>Avatar source</label>
-              <div className="profile__switch">
-                <button
-                  type="button"
-                  className={avatarMode === "url" ? "is-active" : ""}
-                  onClick={() => setAvatarMode("url")}
-                >
-                  URL
-                </button>
-                <button
-                  type="button"
-                  className={avatarMode === "upload" ? "is-active" : ""}
-                  onClick={() => setAvatarMode("upload")}
-                >
-                  Upload
-                </button>
-              </div>
-            </div>
-            {avatarMode === "url" ? (
-              <div className="profile__field">
-                <label htmlFor="avatarUrl">Avatar URL</label>
+              <label htmlFor="avatarFile">Upload avatar</label>
+              <div className="profile__upload">
                 <input
-                  id="avatarUrl"
-                  type="url"
-                  value={formData.avatarUrl}
+                  id="avatarFile"
+                  type="file"
+                  accept="image/*"
                   onChange={(event) =>
-                    setFormData({ ...formData, avatarUrl: event.target.value })
+                    setAvatarFile(event.target.files?.[0] ?? null)
                   }
-                  placeholder="https://"
                 />
+                <label htmlFor="avatarFile" className="profile__file-button">
+                  Choose image
+                </label>
+                <span className="profile__file-name">
+                  {avatarFile?.name || "No file selected"}
+                </span>
               </div>
-            ) : (
-              <div className="profile__field">
-                <label htmlFor="avatarFile">Upload avatar</label>
-                <div className="profile__upload">
-                  <input
-                    id="avatarFile"
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) =>
-                      setAvatarFile(event.target.files?.[0] ?? null)
-                    }
-                  />
-                  <label htmlFor="avatarFile" className="profile__file-button">
-                    Choose image
-                  </label>
-                  <span className="profile__file-name">
-                    {avatarFile?.name || "No file selected"}
-                  </span>
-                </div>
-                <p className="profile__upload-note">
-                  The file will be uploaded when you save changes.
-                </p>
-              </div>
-            )}
-            <div className="profile__field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(event) =>
-                  setFormData({ ...formData, email: event.target.value })
-                }
-              />
+              <p className="profile__upload-note">
+                The file will be uploaded when you save changes.
+              </p>
             </div>
-            <div className="profile__field">
-              <label htmlFor="newPassword">New password</label>
-              <input
-                id="newPassword"
-                type="password"
-                value={formData.newPassword}
-                onChange={(event) =>
-                  setFormData({ ...formData, newPassword: event.target.value })
-                }
-                autoComplete="new-password"
-              />
-            </div>
-            <div className="profile__field">
-              <label htmlFor="confirmPassword">Confirm password</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    confirmPassword: event.target.value,
-                  })
-                }
-                autoComplete="new-password"
-              />
-            </div>
-            {message && <p className="profile__message">{message}</p>}
-            {error && <p className="profile__error">{error}</p>}
-            <div className="profile__actions">
-              <button type="submit" className="profile__save">
-                {isUploading ? "Saving..." : "Save changes"}
-              </button>
-              <button type="button" className="profile__cancel" onClick={handleCancel}>
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+          )}
+          <div className="profile__field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(event) =>
+                setFormData({ ...formData, email: event.target.value })
+              }
+            />
+          </div>
+          <div className="profile__field">
+            <label htmlFor="newPassword">New password</label>
+            <input
+              id="newPassword"
+              type="password"
+              value={formData.newPassword}
+              onChange={(event) =>
+                setFormData({ ...formData, newPassword: event.target.value })
+              }
+              autoComplete="new-password"
+            />
+          </div>
+          <div className="profile__field">
+            <label htmlFor="confirmPassword">Confirm password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  confirmPassword: event.target.value,
+                })
+              }
+              autoComplete="new-password"
+            />
+          </div>
+          {message && <p className="profile__message">{message}</p>}
+          {error && <p className="profile__error">{error}</p>}
+          <div className="profile__actions">
+            <button type="submit" className="profile__save">
+              {isUploading ? "Saving..." : "Save changes"}
+            </button>
+            <button type="button" className="profile__cancel" onClick={handleCancel}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   )
 }
