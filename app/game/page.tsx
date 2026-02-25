@@ -874,21 +874,20 @@ export function GamePageContent({ forcedDate }: GamePageContentProps) {
                                     : "guess-chip--miss"
                               }`}
                             >
-                              {characterOfDay.age == null
+                              {guessedCharacter.age == null
                                 ? "?"
                                 : <>
-                                    {guessedCharacter.age == null
-                                      ? "?"
-                                      : <>
-                                          {guessedCharacter.age}
-                                          {comparisons.ageComparison === "up" && (
-                                            <ArrowUp style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
-                                          )}
-                                          {comparisons.ageComparison === "down" && (
-                                            <ArrowDown style={{ marginLeft: 4, verticalAlign: "middle" }} size={16} />
-                                          )}
-                                        </>
-                                    }
+                                    {characterOfDay.age != null && guessedCharacter.age != null && (
+                                      <>
+                                        {comparisons.ageComparison === "up" && (
+                                          <ArrowUp className="guess-chip__icon" size={14} />
+                                        )}
+                                        {comparisons.ageComparison === "down" && (
+                                          <ArrowDown className="guess-chip__icon" size={14} />
+                                        )}
+                                        {guessedCharacter.age}
+                                      </>
+                                    )}
                                   </>
                               }
                             </span>

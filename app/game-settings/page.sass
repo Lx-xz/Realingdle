@@ -7,18 +7,7 @@
     height: 100%
     display: flex
     flex-flow: column
-
-  &__header
-    display: flex
-    justify-content: space-between
-    align-items: center
-
-  &__title
-    font-size: 28px
-    font-weight: 700
-    text-align: center
-    letter-spacing: 0.08em
-    text-transform: uppercase
+    gap: 1.5rem
 
   &__error
     color: var(--danger)
@@ -29,7 +18,6 @@
   &__tabs
     display: flex
     gap: 8px
-    margin-bottom: 24px
     background: #ffffff
     border: 1px solid var(--border)
     border-radius: 16px
@@ -63,13 +51,9 @@
         color: #ffffff
 
   &__content
-    background: #ffffff
-    border: 1px solid var(--border)
-    border-radius: 16px
-    padding: 20px
-    flex: 1
     display: flex
     flex-direction: column
+    flex: 1
 
   &__table-toolbar
     display: flex
@@ -207,19 +191,18 @@
       box-shadow: 0 1px 0 var(--border)
 
     td
-      padding: 16px
+      padding: 0
       border-top: 1px solid var(--border)
+      height: 70px
 
   &__cell--actions
     text-align: left
     white-space: nowrap
-    width: 1%
+    width: max-content
 
   &__image-preview
-    width: 56px
-    height: 56px
-    border-radius: 10px
-    object-fit: cover
+    height: 100%
+    aspect-ratio: 4/5
     border: 1px solid var(--border)
 
   &__actions
@@ -274,7 +257,6 @@
   &__modal-row
     display: grid
     grid-template-columns: 140px 1fr
-    gap: 12px
     align-items: start
 
   &__modal-label
@@ -656,6 +638,9 @@
 
 @media screen and (max-width: 600px)
   .configs
+    &__container
+      gap: 0.2rem
+
     &__tabs
       gap: 4px
       padding: 4px
@@ -667,7 +652,32 @@
     &__content
       padding: 12px
 
-      
+    &__table-toolbar
+      width: 100%
+      gap: 12px
+      flex-flow: row-reverse
+
+    &__column-picker
+      height: 100%
+
+  .character-table,
+  .lookup-table
+    &__header
+      flex-direction: column
+      align-items: flex-start
+      gap: 12px
+      margin: 0
+
+      & button
+        padding: 0.4rem 0.8rem
+        font-size: 12px
+        justify-content: center
+        align-items: center
+        width: 100%
+        height: 100%
+
+  .scroll-area__track
+    display: none
 
 @keyframes form-pop
   from

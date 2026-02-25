@@ -997,10 +997,6 @@ export default function GameSettingsPage() {
   return (
     <div className="configs">
       <div className="configs__container">
-        <div className="configs__header">
-          <h1 className="configs__title">Game Settings</h1>
-        </div>
-
         {error && <p className="configs__error">{error}</p>}
 
         <div className="configs__tabs">
@@ -1121,7 +1117,7 @@ export default function GameSettingsPage() {
                     {!isCharacterFormOpen && (
                       <Button onClick={() => setIsCharacterFormOpen(true)}>
                         <span className="button__icon">
-                          <Plus size={16} />
+                          <Plus size={18} />
                         </span>
                         Add Character
                       </Button>
