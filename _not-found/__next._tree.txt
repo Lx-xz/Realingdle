@@ -1,5 +1,5 @@
 :HL["/realingdle/_next/static/chunks/d674c53bb01b81bb.css","style"]
 :HL["/realingdle/_next/static/chunks/5226d26e537045aa.css","style"]
-:HL["/realingdle/_next/static/chunks/08e0792f7de99f74.css","style"]
+:HL["/realingdle/_next/static/chunks/94391016cdb29d8b.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap","style"]
-0:{"buildId":"XuTnEKrn57apicgWHcrZX","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"/_not-found","paramType":null,"paramKey":"/_not-found","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"l3nzHWuppTQxrZPwpCIou","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"/_not-found","paramType":null,"paramKey":"/_not-found","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
